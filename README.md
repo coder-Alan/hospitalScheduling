@@ -1,6 +1,6 @@
 # crm
 
-> A Vue.js project
+> crm后台管理系统
 
 ## Build Setup
 
