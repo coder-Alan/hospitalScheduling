@@ -2,11 +2,14 @@ var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
-  entry: './src/main.js',
+  entry: {
+    'main': './src/main.js',
+    'login': './src/login.js'
+  },
   output: {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/dist/',
-    filename: 'build.js'
+    filename: '[name].js'
   },
   module: {
     rules: [
@@ -61,7 +64,7 @@ module.exports = {
         exclude: /node_modules/
       },
       {
-        test: /\.(png|jpg|gif|svg|ttf)$/,
+        test: /\.(png|jpg|gif|svg|ttf|woff)$/,
         loader: 'file-loader',
         options: {
           name: '[name].[ext]?[hash]'
