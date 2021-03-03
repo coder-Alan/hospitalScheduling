@@ -4,16 +4,16 @@
           <h2 class="login-title">康德医院排班管理系统</h2>
           <div class="login-form">
             <div class="form-title">欢迎登录</div>
-            <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="60px" class="form">
-            <el-form-item label="账号:" prop="userName">
-                <el-input type="text" v-model="ruleForm.userName" autocomplete="off"></el-input>
+            <el-form :model="loginRuleForm" status-icon :rules="rules" ref="loginRuleForm" label-width="60px" class="form">
+            <el-form-item label="账号:" prop="uName">
+                <el-input type="text" v-model="loginRuleForm.uName" autocomplete="off"></el-input>
             </el-form-item>
-            <el-form-item label="密码:" prop="passWord">
-                <el-input type="password" v-model="ruleForm.passWord" autocomplete="off"></el-input>
+            <el-form-item label="密码:" prop="uPassword">
+                <el-input type="password" v-model="loginRuleForm.uPassword" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item class="form-item">
-                <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
-                <el-button type="success" @click="resetForm('ruleForm')" class="success">注册</el-button>
+                <el-button type="primary" @click="submitForm('loginRuleForm')">登录</el-button>
+                <el-button type="success" @click="resetForm()" class="success">注册</el-button>
             </el-form-item>
           </el-form>
           </div>
@@ -22,26 +22,26 @@
           <div class="login-form">
             <div class="form-title">注册</div>
             <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px" class="form">
-              <el-form-item label="用户名:" prop="number">
-                <el-input type="text" v-model="ruleForm.number" autocomplete="off"></el-input>
+              <el-form-item label="用户名:" prop="uNickName">
+                <el-input type="text" v-model="ruleForm.uNickName" @blur='testNickName' autocomplete="off"></el-input>
               </el-form-item>
-              <el-form-item label="账号:" prop="userName">
-                  <el-input type="text" v-model="ruleForm.userName" autocomplete="off"></el-input>
+              <el-form-item label="账号:" prop="uName">
+                  <el-input type="text" v-model="ruleForm.uName" @blur='testName' autocomplete="off"></el-input>
               </el-form-item>
-              <el-form-item label="密码:" prop="passWord">
-                  <el-input type="password" v-model="ruleForm.passWord" autocomplete="off"></el-input>
+              <el-form-item label="密码:" prop="uPassword">
+                  <el-input type="password" v-model="ruleForm.uPassword" autocomplete="off"></el-input>
               </el-form-item>
               <el-form-item label="确认密码:" prop="againPassWord">
                   <el-input type="password" v-model="ruleForm.againPassWord" autocomplete="off"></el-input>
               </el-form-item>
-              <el-form-item label="性别:" prop="sex">
-                  <el-input type="text" v-model="ruleForm.sex" autocomplete="off"></el-input>
+              <el-form-item label="手机号:" prop="uPhone">
+                  <el-input type="text" v-model="ruleForm.uPhone" autocomplete="off"></el-input>
               </el-form-item>
-              <el-form-item label="手机号:" prop="phone">
-                  <el-input type="text" v-model="ruleForm.phone" autocomplete="off"></el-input>
+              <el-form-item label="备注:" prop="registration">
+                  <el-input type="text" v-model="ruleForm.registration" autocomplete="off"></el-input>
               </el-form-item>
               <el-form-item class="form-item">
-                  <el-button type="primary" @click="registeredSure()">确定</el-button>
+                  <el-button type="primary" @click="registeredSure('ruleForm')">确定</el-button>
                   <el-button type="success" @click="registeredCancel()" class="success">取消</el-button>
               </el-form-item>
             </el-form>
@@ -52,23 +52,24 @@
 
 <script>
 import {HTTP, LOGIN} from './api/api.js'
+import axios from 'axios'
+
 export default {
     data() {
       var validateUserName = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请输入账号'));
-        } else {
-          if (this.ruleForm.userName !== '') {
-            this.$refs.ruleForm.validateField('checkPass');
+        setTimeout(() => {
+          if (this.isRegisteredName) {
+            callback(new Error('该账号已存在'));
+          } else if (value === '') {
+            callback(new Error('请输入账号'));
+          } else {
+            callback();
           }
-          callback();
-        }
+        }, 500)
       };
       var validatePassWord = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请输入密码'));
-        } else if (value !== this.ruleForm.passWord) {
-          callback(new Error('两次输入密码不一致!'));
         } else {
           callback();
         }
@@ -82,77 +83,107 @@ export default {
           callback();
         }
       };
-      var validateNumber = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请输入用户名'));
-        } else if (value !== this.ruleForm.number) {
-          callback(new Error('两次输入密码不一致!'));
-        } else {
-          callback();
-        }
-      };
-      var validateSex = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请输入性别'));
-        } else if (value !== this.ruleForm.sex) {
-          callback(new Error('两次输入密码不一致!'));
-        } else {
-          callback();
-        }
+      var validateNickName = (rule, value, callback) => {
+        setTimeout(() => {
+          if (this.isRegisteredNickName) {
+            callback(new Error('该用户名已存在'));
+          } else if (value === '') {
+            callback(new Error('请输入用户名'));
+          } else {
+            callback();
+          }
+        }, 500)
       };
       var validatePhone = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请输入手机号'));
-        } else if (value !== this.ruleForm.phone) {
-          callback(new Error('两次输入密码不一致!'));
+        } else {
+          callback();
+        }
+      };
+      var validateRegistration = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入备注'));
         } else {
           callback();
         }
       };
       return {
+        loginRuleForm: {
+          uName: '',
+          uPassword: '',
+        },
         ruleForm: {
-          userName: '',
-          passWord: '',
+          uName: '',
+          uPassword: '',
           againPassWord: '',
-          number: '',
-          sex: '',
-          phone: ''
+          uNickName: '',
+          uPhone: '',
+          registration: '',
         },
         rules: {
-          userName: [{ validator: validateUserName, trigger: 'blur' }],
-          passWord: [{ validator: validatePassWord, trigger: 'blur' }],
+          uName: [{ validator: validateUserName, trigger: 'blur' }],
+          uPassword: [{ validator: validatePassWord, trigger: 'blur' }],
           againPassWord: [{ validator: validatePassWord, trigger: 'blur' }],
-          number: [{ validator: validateNumber, trigger: 'blur' }],
-          sex: [{ validator: validateSex, trigger: 'blur' }],
-          phone: [{ validator: validatePhone, trigger: 'blur' }],
+          uNickName: [{ validator: validateNickName, trigger: 'blur' }],
+          uPhone: [{ validator: validatePhone, trigger: 'blur' }],
+          registration: [{ validator: validateRegistration, trigger: 'blur' }],
         },
-        toRegistered: false
+        toRegistered: false,
+        isRegisteredName: false,
+        isRegisteredNickName: false,
       };
     },
     methods: {
+      testNickName() {
+        if (this.ruleForm.uNickName != '') {
+          axios.post('http://192.168.1.5:3000/api/test/nickname', {
+            uNickName: this.ruleForm.uNickName
+          }).then(res => {
+            if (res.data.data.code != 200) {
+              this.isRegisteredNickName = true
+            } else {
+              this.isRegisteredNickName = false
+            }
+          })
+        }
+      },
+      testName() {
+        if (this.ruleForm.uName != '') {
+          axios.post('http://192.168.1.5:3000/api/test/name', {
+            uName: this.ruleForm.uName
+          }).then(res => {
+            if (res.data.data.code != 200) {
+              this.isRegisteredName = true
+            } else {
+              this.isRegisteredName = false
+            }
+          })
+        }
+      },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
             console.log('登录')
-            this.$http.post(HTTP + LOGIN,{
-                username: this.ruleForm.userName,
-                password: this.ruleForm.passWord
-            },{emulateJSON:true}).then((data)=>{
-                if (data.data.msg == '用户名或密码错误') {
-                    this.$message.error('用户名或密码错误');
-                } else if (data.data.msg == '成功') {
-                    localStorage.token = data.data.data.token;
-                    console.log('登录成功');
-                    this.$message({
-                      message: '登陆成功',
-                      type: 'success'
-                    });
-                    setTimeout(()=>{
-                      location.href = '/'
-                    },500)
-                }
-            },(err)=>{
+            axios.post('http://192.168.1.5:3000/api/login', {
+              uName: this.loginRuleForm.uName,
+              uPassword: this.loginRuleForm.uPassword
+            }).then(res => {
+              console.log(res)
+              let data = res.data.data
+              if (data.code == 200) {
+                localStorage.setItem('userToken', data.data.uToken)
+                localStorage.setItem('userName', data.data.uName)
+                this.$message({
+                  message: '登陆成功,3秒后自动进入系统',
+                  type: 'success'
+                });
+                setTimeout(()=>{
+                  location.href = '/'
+                }, 3000)
+              } else {
                 this.$message.error('登录失败');
+              }
             })
           } else {
             console.log('error submit!!');
@@ -160,14 +191,37 @@ export default {
           }
         });
       },
-      resetForm(formName) {
+      resetForm() {
         // this.$refs[formName].resetFields();
         this.toRegistered = true
       },
-      registeredSure() {
-        this.$message({
-          message: '注册成功',
-          type: 'success'
+      // 注册确认
+      registeredSure(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            console.log('注册')
+            console.log('提交的表单信息：', this.ruleForm)
+            axios.post('http://192.168.1.5:3000/api/addUser', {
+              uName: this.ruleForm.uName,
+              uPassword: this.ruleForm.uPassword,
+              uNickName: this.ruleForm.uNickName,
+              uPhone: this.ruleForm.uPhone,
+              registration: this.ruleForm.registration,
+            }).then(res => {
+              console.log(res)
+              let data = res.data.data
+              if (data.code == 200) {
+                this.$message({
+                  message: '注册成功',
+                  type: 'success'
+                });
+                this.toRegistered = false;
+              }
+            })
+          } else {
+            console.log('error registered!!', data.message);
+            return false;
+          }
         });
       },
       registeredCancel() {

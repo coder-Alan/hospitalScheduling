@@ -38,6 +38,11 @@ export default {
       menu: []
     }
   },
+  created() {
+    this.axios.get('http://192.168.1.5:3000/api/index_list/data').then(res => {
+      console.log(res)
+    })
+  },
   mounted() {
     this.getmenu()
   },

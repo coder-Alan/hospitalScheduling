@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import resource from 'vue-resource';
-import store from './store/index'
+import axios from 'axios';
+import store from './store/index';
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import App from './App.vue'
 
 Vue.use(resource);
+Vue.prototype.axios = axios;
 Vue.use(ElementUI);
 
 // 判断有没有登录
