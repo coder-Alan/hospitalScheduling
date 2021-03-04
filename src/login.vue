@@ -174,6 +174,7 @@ export default {
               if (data.code == 200) {
                 localStorage.setItem('userToken', data.data.uToken)
                 localStorage.setItem('userName', data.data.uName)
+                localStorage.setItem('userPower', data.data.uPower)
                 this.$message({
                   message: '登陆成功,3秒后自动进入系统',
                   type: 'success'

@@ -7,6 +7,12 @@ var User = {
 			return "select * from user where uNickName = '"+param.uNickName+"'";
 		}
 	},
+	// 查询权限
+	queryUserPower(param) {
+		if (param.uPower) {
+			return "select * from table_power where FIND_IN_SET(id, '" + param.uPower + "')";
+		}
+	},
 	// 验证用户名和密码
 	queryUserPwd(param) {
 		return "select * from user where uName = '"+param.uName+"' and uPassword = '"+param.uPassword+"' ";

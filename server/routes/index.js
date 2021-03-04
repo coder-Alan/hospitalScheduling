@@ -23,12 +23,6 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/api/index_list/data', function(req, res, next) {
-  res.json({
-    'a': 1
-  });
-});
-
 //用户登录
 router.post('/api/login', function(req, res, next) {
 	//前端给后端的数据
@@ -113,8 +107,8 @@ router.post('/api/test/nickname', function(req, res, next) {
 		}else{
 			res.send({
 				data:{
-          code: 200,
-          message: '该用户名可以注册'
+					code: 200,
+					message: '该用户名可以注册'
 				}
 			})
 		}
@@ -161,6 +155,31 @@ router.post('/api/addUser', function(req, res, next) {
       })
     }
   })
+})
+
+// 查询用户权限
+router.post('/api/queryPower', function(req, res, next) {
+	let params = {
+		uPower: req.body.uPower
+	};
+	connection.query( user.queryUserPower( params ) , function (error, results, fields) {
+		if( results.length > 0 ){
+			res.send({
+				data:{
+					code: 200,
+					message: "查询成功",
+					data: results
+				}
+			})
+		}else{
+			res.send({
+				data:{
+					code: -100,
+					message: error
+				}
+			})
+		}
+	})
 })
 
 module.exports = router;

@@ -4,17 +4,18 @@ import axios from 'axios';
 import store from './store/index';
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-import App from './App.vue'
+import router from './router/index.js';
+import App from './App.vue';
 
 Vue.use(resource);
 Vue.prototype.axios = axios;
 Vue.use(ElementUI);
 
 // 判断有没有登录
-if (localStorage.token) {
+if (localStorage.userToken) {
   // 登录成功
   // 设置token请求头
-  Vue.http.headers.common['Authorization'] = localStorage.token
+  Vue.http.headers.common['Authorization'] = localStorage.userToken
 } else {
   // 登录失败
   location.href = './login.html'
@@ -23,5 +24,6 @@ if (localStorage.token) {
 new Vue({
   el: '#app',
   store,
+  router,
   render: h => h(App)
 })
