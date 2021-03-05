@@ -31,7 +31,7 @@ router.post('/api/login', function(req, res, next) {
     uPassword  : req.body.uPassword
 	}
 	//查询用户名存在不存在
-	connection.query( user.queryUserName( params ) , function (error, results, fields) {
+	connection.query( user.queryUser( params ) , function (error, results, fields) {
 		if( results.length > 0 ){
       // 查询密码是否正确
 			connection.query( user.queryUserPwd( params ) , function (err, result) {
@@ -70,7 +70,7 @@ router.post('/api/test/name', function(req, res, next) {
 		uName : req.body.uName
 	};
 	// 查询账号是否存在
-	connection.query( user.queryUserName( params ) , function (error, results, fields) {
+	connection.query( user.queryUser( params ) , function (error, results, fields) {
 		if( results.length > 0 ){
 			res.send({
 				data:{
@@ -96,7 +96,7 @@ router.post('/api/test/nickname', function(req, res, next) {
 		uNickName : req.body.uNickName
 	};
 	// 查询用户名是否存在
-	connection.query( user.queryUserName( params ) , function (error, results, fields) {
+	connection.query( user.queryUser( params ) , function (error, results, fields) {
 		if( results.length > 0 ){
 			res.send({
 				data:{
@@ -128,7 +128,7 @@ router.post('/api/addUser', function(req, res, next) {
 	};
   connection.query( user.inserData( params ) , function (error, results, fields) {
     if( results.length > 0 ){
-      connection.query( user.queryUserName( params ) , function (err, result) {
+      connection.query( user.queryUser( params ) , function (err, result) {
         if( result.length > 0 ){
           res.send({
             data:{
@@ -172,6 +172,47 @@ router.post('/api/queryPower', function(req, res, next) {
 				}
 			})
 		}else{
+			res.send({
+				data:{
+					code: -100,
+					message: error
+				}
+			})
+		}
+	})
+})
+
+// 查询用户
+router.post('/api/queryUserList', function(req, res, next) {
+	let pageSize = req.body.pageSize
+	let page = req.body.page
+	let params = {
+		uName: req.body.uName,
+		uNickName: req.body.uNickName
+	};
+	params.page = (page - 1) * pageSize
+	connection.query( user.queryUser( params ) , function (error, results, fields) {
+		if( results.length > 0 ){
+			connection.query( user.queryUserTotal() , function (err, result) {
+				if (result.length > 0) {
+					res.send({
+						data:{
+							code: 200,
+							data: results,
+							total: result[0]['COUNT(*)'],
+							message: "查询成功"
+						}
+					})
+				} else {
+					res.send({
+						data:{
+							code: -100,
+							message: err
+						}
+					})
+				}
+			})
+		} else {
 			res.send({
 				data:{
 					code: -100,

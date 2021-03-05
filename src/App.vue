@@ -33,8 +33,8 @@
         </el-menu>
       </el-aside>
       <el-container>
-        <el-header>
-          <el-radio-group v-model="isCollapse">
+        <el-header style="height:50px;">
+          <el-radio-group v-model="isCollapse" size="small">
             <el-radio-button :label="false">展开</el-radio-button>
             <el-radio-button :label="true">收起</el-radio-button>
           </el-radio-group>

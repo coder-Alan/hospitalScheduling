@@ -1,11 +1,17 @@
 var User = {
-	// 查询用户名
-	queryUserName(param) {
+	// 查询用户
+	queryUser(param) {
 		if (param.uName) {
 			return "select * from user where uName = '"+param.uName+"'";
 		} else if (param.uNickName) {
 			return "select * from user where uNickName = '"+param.uNickName+"'";
+		} else {
+			return "select uName,uNickName,uPassword,uPhone,uPower,registration,uImgUrl from user where uCode not in(1) limit 10 offset "+param.page+"";
 		}
+	},
+	// 查询用户条数
+	queryUserTotal() {
+		return "SELECT COUNT(*) FROM user where uCode not in(1)";
 	},
 	// 查询权限
 	queryUserPower(param) {
