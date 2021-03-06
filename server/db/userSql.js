@@ -19,6 +19,9 @@ var User = {
 			return "select * from table_power where FIND_IN_SET(id, '" + param.uPower + "')";
 		}
 	},
+	queryAllPower() {
+		return "select * from table_power where id not in(1)";
+	},
 	// 验证用户名和密码
 	queryUserPwd(param) {
 		return "select * from user where uName = '"+param.uName+"' and uPassword = '"+param.uPassword+"' ";
@@ -61,7 +64,14 @@ var User = {
 		// *****tokenEnd
 		
 		return "insert into user (uName,uPassword,uNickName,uPhone,uPower,uImgUrl,registration,uToken) values ('"+uName+"','"+uPassword+"','"+uNickName+"','"+uPhone+"','"+uPower+"','"+uImgUrl+"','"+registration+"','"+uToken+"')";
-	}
+	},
+	// 修改用户信息
+	updateUser(params) {
+		return "update user set uName='" + params.uName + "', uPassword='" + params.uPassword + "', uNickName='" + params.uNickName + "', uPhone='" + params.uPhone + "', uPower='" + params.uPower + "' where uName='" + params.uName +"'";
+	},
+	deleteUser(params) {
+		return "DELETE FROM `user` WHERE uName in (" +params.uName+")";
+	},
 }
 
 exports = module.exports = User;

@@ -24,32 +24,32 @@ router.get('/', function(req, res, next) {
 });
 
 //用户登录
-router.post('/api/login', function(req, res, next) {
+router.post('/login', function(req, res, next) {
 	//前端给后端的数据
 	let params = {
 		uName : req.body.uName,
-    uPassword  : req.body.uPassword
+    	uPassword  : req.body.uPassword
 	}
 	//查询用户名存在不存在
 	connection.query( user.queryUser( params ) , function (error, results, fields) {
 		if( results.length > 0 ){
-      // 查询密码是否正确
+      		// 查询密码是否正确
 			connection.query( user.queryUserPwd( params ) , function (err, result) {
 				if(  result.length > 0 ){
-            res.send({
-                data:{
-                  code: 200,
-                  message: "登录成功",
-                  data: result[0]
-                }
-            })
+					res.send({
+						data:{
+						code: 200,
+						message: "登录成功",
+						data: result[0]
+						}
+					})
 				}else{
-          res.send({
-            data:{
-              code: -100,
-              message: "密码不正确"
-            }
-          })
+					res.send({
+						data:{
+							code: -100,
+							message: "密码不正确"
+							}
+					})
 				}
 			})
 		}else{
@@ -64,7 +64,7 @@ router.post('/api/login', function(req, res, next) {
 });
 
 //注册验证账号是否存在
-router.post('/api/test/name', function(req, res, next) {
+router.post('/testName', function(req, res, next) {
 	// 前端给后端的数据
 	let params = {
 		uName : req.body.uName
@@ -74,15 +74,15 @@ router.post('/api/test/name', function(req, res, next) {
 		if( results.length > 0 ){
 			res.send({
 				data:{
-					code: -100,
+					code: 200,
 					message: "该账号已注册"
 				}
 			})
 		}else{
 			res.send({
 				data:{
-          code: 200,
-          message: error
+					code: -100,
+					message: error
 				}
 			})
 		}
@@ -90,7 +90,7 @@ router.post('/api/test/name', function(req, res, next) {
 })
 
 //注册验证用户名是否存在
-router.post('/api/test/nickname', function(req, res, next) {
+router.post('/testNickName', function(req, res, next) {
 	// 前端给后端的数据
 	let params = {
 		uNickName : req.body.uNickName
@@ -100,14 +100,14 @@ router.post('/api/test/nickname', function(req, res, next) {
 		if( results.length > 0 ){
 			res.send({
 				data:{
-					code: -100,
+					code: 200,
 					message: "该用户名已注册"
 				}
 			})
 		}else{
 			res.send({
 				data:{
-					code: 200,
+					code: -100,
 					message: '该用户名可以注册'
 				}
 			})
@@ -116,49 +116,49 @@ router.post('/api/test/nickname', function(req, res, next) {
 })
 
 // 注册-->数据库添加一条数据
-router.post('/api/addUser', function(req, res, next) {
+router.post('/addUser', function(req, res, next) {
 	// 前端给后端的数据
 	let params = {
 		uName: req.body.uName,
 		uPassword: req.body.uPassword,
-		uImgUrl: req.body.uImgUrl,
 		uNickName: req.body.uNickName,
 		uPhone: req.body.uPhone,
-		registration: req.body.registration,
+		uPower: req.body.uPower,
+		uImgUrl: req.body.uImgUrl,
 	};
-  connection.query( user.inserData( params ) , function (error, results, fields) {
-    if( results.length > 0 ){
-      connection.query( user.queryUser( params ) , function (err, result) {
-        if( result.length > 0 ){
-          res.send({
-            data:{
-              code: 200,
-              message: '注册成功',
-              data: result[0]
-            }
-          })
-        } else {
-          res.send({
-            data:{
-              code: -100,
-              message: err
-            }
-          })
-        }
-      })
-    } else {
-      res.send({
-        data:{
-          code: -100,
-          message: error
-        }
-      })
-    }
-  })
+	connection.query( user.inserData( params ) , function (error, results, fields) {
+		if (results.insertId != '' ){
+			connection.query( user.queryUser( params ) , function (err, result) {
+				if( result.length > 0 ){
+					res.send({
+						data:{
+							code: 200,
+							message: '注册成功',
+							data: result[0]
+						}
+					})
+				} else {
+					res.send({
+						data:{
+						code: -100,
+						message: err
+						}
+					})
+				}
+			})
+		} else {
+			res.send({
+				data:{
+				code: -100,
+					message: error
+				}
+			})
+		}
+	})
 })
 
 // 查询用户权限
-router.post('/api/queryPower', function(req, res, next) {
+router.post('/queryPower', function(req, res, next) {
 	let params = {
 		uPower: req.body.uPower
 	};
@@ -182,8 +182,29 @@ router.post('/api/queryPower', function(req, res, next) {
 	})
 })
 
-// 查询用户
-router.post('/api/queryUserList', function(req, res, next) {
+router.post('/queryAllPower', function (req, res, next) {
+	connection.query(user.queryAllPower(), function (error, results, fields) {
+		if (results.length > 0) {
+			res.send({
+				data: {
+					code: 200,
+					message: "查询成功",
+					data: results
+				}
+			})
+		} else {
+			res.send({
+				data: {
+					code: -100,
+					message: error
+				}
+			})
+		}
+	})
+})
+
+// 查询用户列表
+router.post('/queryUserList', function(req, res, next) {
 	let pageSize = req.body.pageSize
 	let page = req.body.page
 	let params = {

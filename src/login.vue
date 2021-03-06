@@ -37,9 +37,6 @@
               <el-form-item label="手机号:" prop="uPhone">
                   <el-input type="text" v-model="ruleForm.uPhone" autocomplete="off"></el-input>
               </el-form-item>
-              <el-form-item label="备注:" prop="registration">
-                  <el-input type="text" v-model="ruleForm.registration" autocomplete="off"></el-input>
-              </el-form-item>
               <el-form-item class="form-item">
                   <el-button type="primary" @click="registeredSure('ruleForm')">确定</el-button>
                   <el-button type="success" @click="registeredCancel()" class="success">取消</el-button>
@@ -51,7 +48,7 @@
 </template>
 
 <script>
-import {HTTP, LOGIN} from './api/api.js'
+import {addUser, testName, testNickName} from './api/api'
 import axios from 'axios'
 
 export default {
@@ -101,13 +98,6 @@ export default {
           callback();
         }
       };
-      var validateRegistration = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请输入备注'));
-        } else {
-          callback();
-        }
-      };
       return {
         loginRuleForm: {
           uName: '',
@@ -119,7 +109,6 @@ export default {
           againPassWord: '',
           uNickName: '',
           uPhone: '',
-          registration: '',
         },
         rules: {
           uName: [{ validator: validateUserName, trigger: 'blur' }],
@@ -127,7 +116,6 @@ export default {
           againPassWord: [{ validator: validatePassWord, trigger: 'blur' }],
           uNickName: [{ validator: validateNickName, trigger: 'blur' }],
           uPhone: [{ validator: validatePhone, trigger: 'blur' }],
-          registration: [{ validator: validateRegistration, trigger: 'blur' }],
         },
         toRegistered: false,
         isRegisteredName: false,
@@ -137,23 +125,19 @@ export default {
     methods: {
       testNickName() {
         if (this.ruleForm.uNickName != '') {
-          axios.post('http://192.168.1.5:3000/api/test/nickname', {
-            uNickName: this.ruleForm.uNickName
-          }).then(res => {
-            if (res.data.data.code != 200) {
-              this.isRegisteredNickName = true
+          testNickName({uNickName: this.ruleForm.uNickName}).then(res => {
+            if (res.data.data.code == 200) {
+              this.isRegisteredName = true
             } else {
-              this.isRegisteredNickName = false
+              this.isRegisteredName = false
             }
           })
         }
       },
       testName() {
         if (this.ruleForm.uName != '') {
-          axios.post('http://192.168.1.5:3000/api/test/name', {
-            uName: this.ruleForm.uName
-          }).then(res => {
-            if (res.data.data.code != 200) {
+          testName({uName: this.ruleForm.uName}).then(res => {
+            if (res.data.data.code == 200) {
               this.isRegisteredName = true
             } else {
               this.isRegisteredName = false
@@ -202,13 +186,13 @@ export default {
           if (valid) {
             console.log('注册')
             console.log('提交的表单信息：', this.ruleForm)
-            axios.post('http://192.168.1.5:3000/api/addUser', {
+            let ruleForm = {
               uName: this.ruleForm.uName,
               uPassword: this.ruleForm.uPassword,
               uNickName: this.ruleForm.uNickName,
-              uPhone: this.ruleForm.uPhone,
-              registration: this.ruleForm.registration,
-            }).then(res => {
+              uPhone: this.ruleForm.uPhone
+            }
+            addUser(ruleForm).then(res => {
               console.log(res)
               let data = res.data.data
               if (data.code == 200) {
@@ -220,7 +204,7 @@ export default {
               }
             })
           } else {
-            console.log('error registered!!', data.message);
+            console.log('error registered!!');
             return false;
           }
         });

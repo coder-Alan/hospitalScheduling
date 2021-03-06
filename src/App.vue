@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="app">
     <el-container>
       <el-aside width="auto">
         <el-menu
@@ -39,7 +39,7 @@
             <el-radio-button :label="true">收起</el-radio-button>
           </el-radio-group>
         </el-header>
-        <el-main>
+        <el-main class="app-main">
           <router-view></router-view>
         </el-main>
       </el-container>
@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import {HTTP, LISTFORROUTER} from './api/api'
+import {getPower} from './api/api'
 import {mapMutations} from 'vuex'
 
 export default {
@@ -68,7 +68,7 @@ export default {
   methods: {
     ...mapMutations(['setMenu']),
     init() {
-      this.axios.post('http://192.168.1.5:3000/api/queryPower', {
+      getPower({
         uPower: localStorage.userPower
       }).then(res => {
         let data = res.data.data
@@ -99,13 +99,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.app {
+  overflow-y: scroll;
+}
 .leftNav-header {
   font-size: 14px;
   font-weight: bold;
   color: #FFD04B;
 }
+.el-container {
+  height: auto;
+  min-height: 100vh;
+}
 .el-aside {
-  height: 100vh;
+  height: inherit;
   border-right: solid 1px #e6e6e6;
   background-color: #434a50;
   box-sizing: border-box;
@@ -115,6 +122,9 @@ export default {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #ccc;
+}
+.app-main {
+  overflow: hidden;
 }
 .el-menu {
   border: none;
