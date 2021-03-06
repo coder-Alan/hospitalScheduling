@@ -1,10 +1,10 @@
 <template>
     <div class="user-container">
         <div class="filter-container">
-            <label for="searchName" class="filter-name">用户账号：</label>
-            <el-input id="searchName" v-model.trim="listQuery.uName" style="padding-right:20px;" class="filter-input" placeholder="请输入" />
-            <label for="searchNickName" class="filter-name">用户名称：</label>
-            <el-input id="searchNickName" v-model.trim="listQuery.uNickName" class="filter-input" placeholder="请输入" />
+            <label for="searchName" class="filter-name">员工编号：</label>
+            <el-input id="searchName" v-model.trim="listQuery.yCode" style="padding-right:20px;" class="filter-input" placeholder="请输入" />
+            <label for="searchNickName" class="filter-name">员工姓名：</label>
+            <el-input id="searchNickName" v-model.trim="listQuery.yName" class="filter-input" placeholder="请输入" />
             <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">搜索</el-button>
             <el-button v-waves class="filter-item" type="success" icon="el-icon-edit" @click="handleAdd">添加</el-button>
             <el-button v-waves class="filter-item" type="danger" icon="el-icon-delete" @click="handleRemove">批量删除</el-button>
@@ -24,39 +24,49 @@
                 align="center"
                 width="50"
             />
-            <el-table-column label="用户名称" width="150" align="center">
+            <el-table-column label="员工编号" width="100" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.uNickName }}</span>
+                    <span>{{ scope.row.yCode }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="用户账号" width="150" align="center">
+            <el-table-column label="用户编号" width="100" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.uName }}</span>
+                    <span>{{ scope.row.uCode }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="用户密码" width="150" align="center">
+            <el-table-column label="员工姓名" width="120" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.uPassword }}</span>
+                    <span>{{ scope.row.yName }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="手机号码" width="120" align="center">
+            <el-table-column label="员工性别" width="80" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.uPhone }}</span>
+                    <span>{{ scope.row.ySex }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="用户权限" align="center">
+            <el-table-column label="员工类别" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.uPower }}</span>
+                    <span>{{ scope.row.yCategory }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="注册日期" width="170" align="center">
+            <el-table-column label="员工职称" width="150" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.registration }}</span>
+                    <span>{{ scope.row.yTitle }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="用户头像" show-overflow-tooltip width="170" align="center">
+            <el-table-column label="所属科室" show-overflow-tooltip width="170" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.uImgUrl }}</span>
+                    <span>{{ scope.row.yDepartment }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="手机号码" show-overflow-tooltip width="170" align="center">
+                <template slot-scope="scope">
+                    <span>{{ scope.row.yPhone }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="员工头像" show-overflow-tooltip width="170" align="center">
+                <template slot-scope="scope">
+                    <span>{{ scope.row.yImgUrl }}</span>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="150" align="center">
@@ -72,33 +82,32 @@
         <!-- 添加、编辑对话框 -->
         <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible" width="30%">
             <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px" class="form">
-                <el-form-item label="用户名称:" prop="uNickName">
-                    <el-input type="text" v-model="ruleForm.uNickName" @blur='testNickName' autocomplete="off"></el-input>
+                <el-form-item label="员工编号:" prop="yCode">
+                    <el-input type="text" v-model="ruleForm.yCode" @blur='testYCode' autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="用户账号:" prop="uName">
-                    <el-input type="text" v-model="ruleForm.uName" @blur='testName' autocomplete="off"></el-input>
+                <el-form-item label="用户编号:" prop="uCode">
+                    <el-input type="text" v-model="ruleForm.uCode" @blur='testUCode' autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="用户密码:" prop="uPassword">
-                    <el-input type="password" v-model="ruleForm.uPassword" autocomplete="off" show-password></el-input>
+                <el-form-item label="员工姓名:" prop="yName">
+                    <el-input type="text" v-model="ruleForm.yName" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="手机号:" prop="uPhone">
-                    <el-input type="text" v-model="ruleForm.uPhone" autocomplete="off"></el-input>
+                <el-form-item label="员工性别:" prop="ySex">
+                    <el-input type="text" v-model="ruleForm.ySex" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="用户权限:">
-                    <el-select
-                        v-model="ruleForm.powerSelected"
-                        multiple
-                        default-first-option
-                        placeholder="请选择权限"
-                        style='width:260px;'
-                    >
-                        <el-option
-                        v-for="item in dialogPower"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                        </el-option>
-                    </el-select>
+                <el-form-item label="员工类别:" prop="yCategory">
+                    <el-input type="text" v-model="ruleForm.yCategory" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="员工职称:" prop="yTitle">
+                    <el-input type="text" v-model="ruleForm.yTitle" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="所属科室:" prop="yDepartment">
+                    <el-input type="text" v-model="ruleForm.yDepartment" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="手机号码:" prop="yPhone">
+                    <el-input type="text" v-model="ruleForm.yPhone" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="员工头像:" prop="yImgUrl">
+                    <el-input type="text" v-model="ruleForm.yImgUrl" autocomplete="off"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -111,54 +120,76 @@
 
 <script>
 import {
-    addUser,
-    queryUserList,
-    getAllPower,
-    testName,
-    testNickName,
-    querySingleUser,
-    updateUser,
-    deleteUser
-} from '../api/user'
+    addStaff,
+    queryStaffList,
+    testYCode,
+    testUCode,
+    querySingleStaff,
+    updateStaff,
+    deleteStaff
+} from '../api/staff'
 import waves from '../directive/waves' // 按钮水波纹
 import Pagination from './Pagination/index' // secondary package based on el-pagination
 
 export default {
     data() {
-        var validateUserName = (rule, value, callback) => {
+        var validateYCode = (rule, value, callback) => {
             setTimeout(() => {
-            if (this.isRegisteredName) {
-                callback(new Error('该账号已存在'));
-                this.isRegisteredName = false
-            } else if (value === '') {
-                callback(new Error('请输入账号'));
-            } else {
-                callback();
-            }
+                if (this.isRegisteredYCode) {
+                    callback(new Error('该员工编号已存在'));
+                    this.isRegisteredYCode = false
+                } else if (value === '') {
+                    callback(new Error('请输入员工编号'));
+                } else {
+                    callback();
+                }
             }, 500)
         };
-        var validatePassWord = (rule, value, callback) => {
-            if (value === '') {
-                callback(new Error('请输入密码'));
-            } else {
-                callback();
-            }
-        };
-        var validateNickName = (rule, value, callback) => {
+        var validateUCode = (rule, value, callback) => {
             setTimeout(() => {
-            if (this.isRegisteredNickName) {
-                callback(new Error('该用户名已存在'));
-                this.isRegisteredNickName = false
-            } else if (value === '') {
-                callback(new Error('请输入用户名'));
-            } else {
-                callback();
-            }
+                if (this.isRegisteredUCode) {
+                    callback(new Error('该用户编号已存在'));
+                    this.isRegisteredUCode = false
+                } else if (value === '') {
+                    callback(new Error('请输入用户编号'));
+                } else if (value == 1) {
+                    callback(new Error('该用户编号无法绑定'));
+                } else {
+                    callback();
+                }
             }, 500)
         };
-        var validatePhone = (rule, value, callback) => {
+        var validateYName = (rule, value, callback) => {
             if (value === '') {
-                callback(new Error('请输入手机号'));
+                callback(new Error('请输入员工姓名'));
+            } else {
+                callback();
+            }
+        };
+        var validateYCategory = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请输入员工类别'));
+            } else {
+                callback();
+            }
+        };
+        var validateYTitle = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请输入员工职称'));
+            } else {
+                callback();
+            }
+        };
+        var validateYDepartment = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请输入所属科室'));
+            } else {
+                callback();
+            }
+        };
+        var validateYPhone = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请输入手机号码'));
             } else {
                 callback();
             }
@@ -167,29 +198,34 @@ export default {
             list: [],
             total: 0,
             listQuery: {
-                uName: '',
-                uNickName: '',
+                yCode: '',
+                yName: '',
                 page: 1,
                 pageSize: 10
             },
             listLoading: false, // 加载中
             dialogFormVisible: false, // 添加、编辑弹出框
-            formLabelWidth: '120px',
             dialogTitle: '',
-            dialogPower: [],
             // 添加、编辑表单验证
             ruleForm: {
-                uName: '',
-                uPassword: '',
-                uNickName: '',
-                uPhone: '',
-                powerSelected: []
+                yCode: '',
+                uCode: '',
+                yName: '',
+                ySex: '',
+                yCategory: '',
+                yTitle: '',
+                yDepartment: '',
+                yPhone: '',
+                yImgUrl: ''
             },
             rules: {
-                uName: [{ validator: validateUserName, trigger: 'blur' }],
-                uPassword: [{ validator: validatePassWord, trigger: 'blur' }],
-                uNickName: [{ validator: validateNickName, trigger: 'blur' }],
-                uPhone: [{ validator: validatePhone, trigger: 'blur' }],
+                yCode: [{ validator: validateYCode, trigger: 'blur' }],
+                uCode: [{ validator: validateUCode, trigger: 'blur' }],
+                yName: [{ validator: validateYName, trigger: 'blur' }],
+                yCategory: [{ validator: validateYCategory, trigger: 'blur' }],
+                yTitle: [{ validator: validateYTitle, trigger: 'blur' }],
+                yDepartment: [{ validator: validateYDepartment, trigger: 'blur' }],
+                yPhone: [{ validator: validateYPhone, trigger: 'blur' }],
             }, 
             handle: '', // 当前操作
             currentDelete: '', // 当前删除(单个/批量)对象
@@ -203,25 +239,11 @@ export default {
     directives: { waves },
     created() {
         this.getList()
-        getAllPower().then(res => {
-            let data = res.data.data
-            if (data.code == 200) {
-                console.log('获取所有权限：', data)
-                data.data.forEach(item => {
-                    this.dialogPower.push({
-                        value: item.id,
-                        label: item.name
-                    })
-                });
-            }
-        }), (err) => {
-            console.log(err)
-        }
     },
     methods: {
         getList() {
             this.listLoading = true
-            queryUserList(this.listQuery).then(res => {
+            queryStaffList(this.listQuery).then(res => {
                 let data = res.data.data
                 if (data.code == 200) {
                     this.listLoading = false
@@ -235,20 +257,15 @@ export default {
         handleSelectionChange(val) {
             let uNameList = []
             val.forEach(item => {
-                uNameList.push(item.uName)
+                uNameList.push(item.yCode)
             })
-            let str = ''
-            uNameList.forEach(item => {
-                str += ("'" + item + "',")
-            })
-            str = str.slice(0, str.lastIndexOf(','))
-            this.currentDelete = str
+            this.currentDelete = uNameList.join(',')
         },
         handleFilter() {
             this.listLoading = true
             this.listQuery.page = 1
             this.listQuery.pageSize = 10
-            queryUserList(this.listQuery).then(res => {
+            queryStaffList(this.listQuery).then(res => {
                 let data = res.data.data
                 if (data.code == 200) {
                     this.listLoading = false
@@ -264,11 +281,15 @@ export default {
             this.handle = 'add'
             this.dialogFormVisible = true
             this.ruleForm = {
-                uName: '',
-                uPassword: '',
-                uNickName: '',
-                uPhone: '',
-                powerSelected: []
+                yCode: '',
+                uCode: '',
+                yName: '',
+                ySex: '',
+                yCategory: '',
+                yTitle: '',
+                yDepartment: '',
+                yPhone: '',
+                yImgUrl: ''
             }
         },
         handleRemove() {
@@ -278,7 +299,7 @@ export default {
                 type: 'warning'
             }).then(() => {
                 if (this.currentDelete != '') {
-                    deleteUser({uName: this.currentDelete}).then(res => {
+                    deleteStaff({yCode: this.currentDelete}).then(res => {
                         let data = res.data.data
                         if (data.code == 200) {
                             this.listLoading = false
@@ -308,37 +329,24 @@ export default {
             this.dialogTitle = '编辑'
             this.handle = 'edit'
             this.dialogFormVisible = true
-            this.ruleForm.uName = val.uName
-            this.ruleForm.uPassword = val.uPassword
-            this.ruleForm.uNickName = val.uNickName
-            this.ruleForm.uPhone = val.uPhone
-            this.ruleForm.powerSelected = val.uPower.split(',').map(item => {
-                return item = JSON.parse(item)
-            })
-            /* querySingleUser({
-              uName: val.uName
-            }).then(res => {
-                console.log(res)
-                if (res.data.data.code == 200) {
-                    let data = res.data.data.data
-                    this.ruleForm.uName = data.uName
-                    this.ruleForm.uPassword = data.uPassword
-                    this.ruleForm.uNickName = data.uNickName
-                    this.ruleForm.uPhone = data.uPhone
-                    this.ruleForm.powerSelected = data.uPower.split(',').map(item => {
-                        return item = JSON.parse(item)
-                    })
-                }
-            }) */
+            this.ruleForm.yCode = val.yCode
+            this.ruleForm.uCode = val.uCode
+            this.ruleForm.yName = val.yName
+            this.ruleForm.ySex = val.ySex
+            this.ruleForm.yCategory = val.yCategory
+            this.ruleForm.yTitle = val.yTitle
+            this.ruleForm.yDepartment = val.yDepartment
+            this.ruleForm.yPhone = val.yPhone
+            this.ruleForm.yImgUrl = val.yImgUrl
         },
         handleDelete(val) {
-            this.currentDelete = "'" + val.uName + "'"
+            this.currentDelete = val.yCode
             this.$confirm('是否确定删除', '删除', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                deleteUser({uName: this.currentDelete}).then(res => {
+                deleteStaff({yCode: this.currentDelete}).then(res => {
                     let data = res.data.data
                     if (data.code == 200) {
                         this.listLoading = false
@@ -363,16 +371,8 @@ export default {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         this.dialogFormVisible = false
-                        let uPower =  this.ruleForm.powerSelected.join(',')
-                        let ruleForm =  {
-                            uName: this.ruleForm.uName,
-                            uPassword: this.ruleForm.uPassword,
-                            uNickName: this.ruleForm.uNickName,
-                            uPhone: this.ruleForm.uPhone,
-                            uPower: uPower
-                        }
-                        console.log('提交的表单', ruleForm)
-                        addUser(ruleForm).then(res => {
+                        console.log('提交的表单', this.ruleForm)
+                        addStaff(this.ruleForm).then(res => {
                             let data = res.data.data
                             if (data.code == 200) {
                                 this.$message({
@@ -380,11 +380,15 @@ export default {
                                     type: 'success'
                                 });
                                 this.ruleForm = {
-                                    uName: '',
-                                    uPassword: '',
-                                    uNickName: '',
-                                    uPhone: '',
-                                    powerSelected: []
+                                    yCode: '',
+                                    uCode: '',
+                                    yName: '',
+                                    ySex: '',
+                                    yCategory: '',
+                                    yTitle: '',
+                                    yDepartment: '',
+                                    yPhone: '',
+                                    yImgUrl: ''
                                 }
                                 this.getList()
                             }
@@ -397,16 +401,8 @@ export default {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         this.dialogFormVisible = false
-                        let uPower =  this.ruleForm.powerSelected.join(',')
-                        let ruleForm =  {
-                            uName: this.ruleForm.uName,
-                            uPassword: this.ruleForm.uPassword,
-                            uNickName: this.ruleForm.uNickName,
-                            uPhone: this.ruleForm.uPhone,
-                            uPower: uPower
-                        }
-                        console.log('提交的表单', ruleForm)
-                        updateUser(ruleForm).then(res => {
+                        console.log('提交的表单', this.ruleForm)
+                        updateStaff(this.ruleForm).then(res => {
                             let data = res.data.data
                             if (data.code == 200) {
                                 this.$message({
@@ -414,11 +410,15 @@ export default {
                                     type: 'success'
                                 });
                                 this.ruleForm = {
-                                    uName: '',
-                                    uPassword: '',
-                                    uNickName: '',
-                                    uPhone: '',
-                                    powerSelected: []
+                                    yCode: '',
+                                    uCode: '',
+                                    yName: '',
+                                    ySex: '',
+                                    yCategory: '',
+                                    yTitle: '',
+                                    yDepartment: '',
+                                    yPhone: '',
+                                    yImgUrl: ''
                                 }
                                 this.getList()
                             }
@@ -433,24 +433,25 @@ export default {
         handleAddCancel() {
             this.dialogFormVisible = false
         },
-        testNickName() {
-            if (this.ruleForm.uNickName != '') {
-                testNickName({uNickName: this.ruleForm.uNickName}).then(res => {
+        testYCode() {
+            if (this.ruleForm.yCode != '') {
+                testYCode({yCode: this.ruleForm.yCode}).then(res => {
                     if (res.data.data.code == 200) {
-                        this.isRegisteredNickName = true
+                        this.isRegisteredYCode = true
                     } else {
-                        this.isRegisteredNickName = false
+                        this.isRegisteredYCode = false
                     }
                 })
             }
         },
-        testName() {
-            if (this.ruleForm.uName != '') {
-                testName({uName: this.ruleForm.uName}).then(res => {
+        testUCode() {
+            console.log(this.ruleForm)
+            if (this.ruleForm.uCode != '') {
+                testUCode({uCode: this.ruleForm.uCode}).then(res => {
                     if (res.data.data.code == 200) {
-                        this.isRegisteredName = true
+                        this.isRegisteredUCode = true
                     } else {
-                        this.isRegisteredName = false
+                        this.isRegisteredUCode = false
                     }
                 })
             }
@@ -515,6 +516,12 @@ export default {
         .el-dialog {
             margin: 0 !important;
         }
+    }
+    .el-dialog__body {
+        padding: 0 30px;
+    }
+    .el-dialog__footer {
+        padding: 0 30px 20px;
     }
 }
 </style>

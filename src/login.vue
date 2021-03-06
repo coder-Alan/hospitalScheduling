@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import {addUser, testName, testNickName} from './api/api'
+import {addUser, testName, testNickName} from './api/user'
 import axios from 'axios'
 
 export default {

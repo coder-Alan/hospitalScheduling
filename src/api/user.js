@@ -1,6 +1,5 @@
 import axios from 'axios';
-// 服务器地址
-const http = 'http://192.168.1.5:3000';
+import {http} from '../static/config';
 
 function addUser(data) {
     return axios.post(

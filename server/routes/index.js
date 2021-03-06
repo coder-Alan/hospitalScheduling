@@ -182,6 +182,7 @@ router.post('/queryPower', function(req, res, next) {
 	})
 })
 
+// 查询所有权限
 router.post('/queryAllPower', function (req, res, next) {
 	connection.query(user.queryAllPower(), function (error, results, fields) {
 		if (results.length > 0) {

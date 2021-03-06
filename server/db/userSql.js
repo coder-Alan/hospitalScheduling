@@ -1,30 +1,30 @@
-var User = {
+var user = {
 	// 查询用户
 	queryUser(param) {
 		if (param.uName) {
-			return "select * from user where uName = '"+param.uName+"'";
+			return "SELECT * FROM table_user WHERE uName = '"+param.uName+"'";
 		} else if (param.uNickName) {
-			return "select * from user where uNickName = '"+param.uNickName+"'";
+			return "SELECT * FROM table_user WHERE uNickName = '"+param.uNickName+"'";
 		} else {
-			return "select uName,uNickName,uPassword,uPhone,uPower,registration,uImgUrl from user where uCode not in(1) limit 10 offset "+param.page+"";
+			return "SELECT uName,uNickName,uPassword,uPhone,uPower,registration,uImgUrl FROM table_user WHERE uCode not in(1) limit 10 offset "+param.page+"";
 		}
 	},
 	// 查询用户条数
 	queryUserTotal() {
-		return "SELECT COUNT(*) FROM user where uCode not in(1)";
+		return "SELECT COUNT(*) FROM table_user WHERE uCode not in(1)";
 	},
 	// 查询权限
 	queryUserPower(param) {
 		if (param.uPower) {
-			return "select * from table_power where FIND_IN_SET(id, '" + param.uPower + "')";
+			return "SELECT * FROM table_power WHERE FIND_IN_SET(id, '" + param.uPower + "')";
 		}
 	},
 	queryAllPower() {
-		return "select * from table_power where id not in(1)";
+		return "SELECT * FROM table_power WHERE id not in(1)";
 	},
 	// 验证用户名和密码
 	queryUserPwd(param) {
-		return "select * from user where uName = '"+param.uName+"' and uPassword = '"+param.uPassword+"' ";
+		return "SELECT * FROM table_user WHERE uName = '"+param.uName+"' and uPassword = '"+param.uPassword+"' ";
 	},
 	// 增加一条用户数据
 	inserData(param) {
@@ -63,15 +63,15 @@ var User = {
 		let uToken = jwt.sign(payload,secret);
 		// *****tokenEnd
 		
-		return "insert into user (uName,uPassword,uNickName,uPhone,uPower,uImgUrl,registration,uToken) values ('"+uName+"','"+uPassword+"','"+uNickName+"','"+uPhone+"','"+uPower+"','"+uImgUrl+"','"+registration+"','"+uToken+"')";
+		return "insert into table_user (uName,uPassword,uNickName,uPhone,uPower,uImgUrl,registration,uToken) values ('"+uName+"','"+uPassword+"','"+uNickName+"','"+uPhone+"','"+uPower+"','"+uImgUrl+"','"+registration+"','"+uToken+"')";
 	},
 	// 修改用户信息
 	updateUser(params) {
-		return "update user set uName='" + params.uName + "', uPassword='" + params.uPassword + "', uNickName='" + params.uNickName + "', uPhone='" + params.uPhone + "', uPower='" + params.uPower + "' where uName='" + params.uName +"'";
+		return "update table_user set uName='" + params.uName + "', uPassword='" + params.uPassword + "', uNickName='" + params.uNickName + "', uPhone='" + params.uPhone + "', uPower='" + params.uPower + "' WHERE uName='" + params.uName +"'";
 	},
 	deleteUser(params) {
-		return "DELETE FROM `user` WHERE uName in (" +params.uName+")";
+		return "DELETE FROM `table_user` WHERE uName in (" +params.uName+")";
 	},
 }
 
-exports = module.exports = User;
+exports = module.exports = user;

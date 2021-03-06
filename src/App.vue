@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import {getPower} from './api/api'
+import {getPower} from './api/user'
 import {mapMutations} from 'vuex'
 
 export default {
