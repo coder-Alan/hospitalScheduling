@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var connection = require('../db/sql.js');
-var staff = require('../db/staffSql.js');
+var places = require('../db/placesSql.js');
 router.all('*', function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With");
@@ -16,13 +16,13 @@ router.get('/', function (req, res, next) {
     res.send('respond with a resource');
 });
 
-// 查询单个员工
-router.post('/querySingleStaff', function (req, res, next) {
+// 查询单个地点
+router.post('/querySinglePlaces', function (req, res, next) {
     let params = {
-        yCode: req.body.yCode
+        dCode: req.body.dCode
     };
-    connection.query(staff.queryStaff(params), function (error, results, fields) {
-        if (results.length > 0) {
+    connection.query(places.queryPlaces(params), function (error, results, fields) {
+        if (results) {
             res.send({
                 data: {
                     code: 200,
@@ -30,7 +30,7 @@ router.post('/querySingleStaff', function (req, res, next) {
                     message: "查询成功"
                 }
             })
-        } else {
+        } else if (error) {
             res.send({
                 data: {
                     code: -100,
@@ -41,19 +41,20 @@ router.post('/querySingleStaff', function (req, res, next) {
     })
 })
 
-// 查询员工列表
-router.post('/queryStaffList', function (req, res, next) {
+// 查询地点列表
+router.post('/queryPlacesList', function (req, res, next) {
     let pageSize = req.body.pageSize
     let page = req.body.page
     let params = {
-        yCode: req.body.yCode,
-        yName: req.body.yName
+        dCode: req.body.dCode,
+        dName: req.body.dName,
+        kName: req.body.kName || ''
     };
     params.page = (page - 1) * pageSize
-    connection.query(staff.queryStaff(params), function (error, results, fields) {
+    connection.query(places.queryPlaces(params), function (error, results, fields) {
         if (results.length > 0) {
-            connection.query(staff.queryStaffTotal(), function (err, result) {
-                if (result.length > 0) {
+            connection.query(places.queryPlacesTotal(), function (err, result) {
+                if (result.length >= 0) {
                     res.send({
                         data: {
                             code: 200,
@@ -62,7 +63,7 @@ router.post('/queryStaffList', function (req, res, next) {
                             message: "查询成功"
                         }
                     })
-                } else {
+                } else if (err) {
                     res.send({
                         data: {
                             code: -100,
@@ -71,31 +72,16 @@ router.post('/queryStaffList', function (req, res, next) {
                     })
                 }
             })
-        } else {
-            res.send({
-                data: {
-                    code: -100,
-                    message: error
-                }
-            })
-        }
-    })
-})
-
-//查询员工编号是否存在
-router.post('/testYCode', function (req, res, next) {
-    let params = {
-        yCode: req.body.yCode
-    };
-    connection.query(staff.queryStaff(params), function (error, results, fields) {
-        if (results.length > 0) {
+        } else if (results.length == 0) {
             res.send({
                 data: {
                     code: 200,
-                    message: "该员工编号已存在"
+                    data: results,
+                    total: 0,
+                    message: "查询成功"
                 }
             })
-        } else {
+        } else if (error) {
             res.send({
                 data: {
                     code: -100,
@@ -106,17 +92,55 @@ router.post('/testYCode', function (req, res, next) {
     })
 })
 
-//查询用户编号是否存在
-router.post('/testUCode', function (req, res, next) {
+//查询地点编号是否存在
+router.post('/testDCode', function (req, res, next) {
     let params = {
-        uCode: req.body.uCode
+        dCode: req.body.dCode
     };
-    connection.query(staff.queryUCode(params), function (error, results, fields) {
+    connection.query(places.queryPlaces(params), function (error, results, fields) {
         if (results.length > 0) {
             res.send({
                 data: {
+                    code: 201,
+                    message: "该地点编号已存在"
+                }
+            })
+        } else if (results.length == 0) {
+            res.send({
+                data: {
                     code: 200,
-                    message: "该用户编号已存在"
+                    message: "该地点编号可以添加"
+                }
+            })
+        } else if (error) {
+            res.send({
+                data: {
+                    code: -100,
+                    message: error
+                }
+            })
+        }
+    })
+})
+
+//查询地点名称是否存在
+router.post('/testDName', function (req, res, next) {
+    let params = {
+        dName: req.body.dName
+    };
+    connection.query(places.queryPlaces(params), function (error, results, fields) {
+        if (results.length > 0) {
+            res.send({
+                data: {
+                    code: 201,
+                    message: "该地点名称已存在"
+                }
+            })
+        } else if (results.length == 0) {
+            res.send({
+                data: {
+                    code: 200,
+                    message: "该地点名称可以添加"
                 }
             })
         } else {
@@ -130,22 +154,38 @@ router.post('/testUCode', function (req, res, next) {
     })
 })
 
-// 添加员工信息
-router.post('/addStaff', function (req, res, next) {
-    let params = {
-        yCode: req.body.yCode,
-        uCode: req.body.uCode,
-        yName: req.body.yName,
-        ySex: req.body.ySex,
-        yCategory: req.body.yCategory,
-        yTitle: req.body.yTitle,
-        yDepartment: req.body.yDepartment,
-        yPhone: req.body.yPhone,
-        yImgUrl: req.body.yImgUrl
-    };
-    connection.query(staff.inserStaffData(params), function (error, results, fields) {
+// 在科室表中查询所有科室名称
+router.get('/queryAllKName', function (req, res, next) {
+    connection.query(places.queryAllKName(), function (error, results, fields) {
         if (results) {
-            connection.query(staff.queryStaff(params), function (err, result) {
+            res.send({
+                data: {
+                    code: 200,
+                    data: results,
+                    message: "查询成功"
+                }
+            })
+        } else if (error) {
+            res.send({
+                data: {
+                    code: -100,
+                    message: error
+                }
+            })
+        }
+    })
+})
+
+// 添加地点信息
+router.post('/addPlaces', function (req, res, next) {
+    let params = {
+        dCode: req.body.dCode,
+        dName: req.body.dName,
+        kName: req.body.kName,
+    };
+    connection.query(places.inserPlacesData(params), function (error, results, fields) {
+        if (results) {
+            connection.query(places.queryPlaces(params), function (err, result) {
                 if (result.length > 0) {
                     res.send({
                         data: {
@@ -154,7 +194,14 @@ router.post('/addStaff', function (req, res, next) {
                             data: result
                         }
                     })
-                } else {
+                } else if (result.length == 0) {
+                    res.send({
+                        data: {
+                            code: 201,
+                            message: result
+                        }
+                    })
+                } else if (err) {
                     res.send({
                         data: {
                             code: -100,
@@ -163,7 +210,7 @@ router.post('/addStaff', function (req, res, next) {
                     })
                 }
             })
-        } else {
+        } else if (error) {
             res.send({
                 data: {
                     code: -100,
@@ -174,21 +221,15 @@ router.post('/addStaff', function (req, res, next) {
     })
 })
 
-// 修改员工信息
-router.post('/updateStaff', function (req, res, next) {
+// 修改地点信息
+router.post('/updatePlaces', function (req, res, next) {
     let params = {
-        yCode: req.body.yCode,
-        uCode: req.body.uCode,
-        yName: req.body.yName,
-        ySex: req.body.ySex,
-        yCategory: req.body.yCategory,
-        yTitle: req.body.yTitle,
-        yDepartment: req.body.yDepartment,
-        yPhone: req.body.yPhone,
-        yImgUrl: req.body.yImgUrl
+        dCode: req.body.dCode,
+        dName: req.body.dName,
+        kName: req.body.kName
     };
-    connection.query(staff.updateStaff(params), function (error, results, fields) {
-        if (results.protocol41) {
+    connection.query(places.updatePlaces(params), function (error, results, fields) {
+        if (results) {
             res.send({
                 data: {
                     code: 200,
@@ -196,7 +237,7 @@ router.post('/updateStaff', function (req, res, next) {
                     message: "修改成功"
                 }
             })
-        } else {
+        } else if (error) {
             res.send({
                 data: {
                     code: -100,
@@ -207,12 +248,12 @@ router.post('/updateStaff', function (req, res, next) {
     })
 })
 
-// 删除员工信息
-router.post('/deleteStaff', function (req, res, next) {
+// 删除地点信息
+router.post('/deletePlaces', function (req, res, next) {
     let params = {
-        yCode: req.body.yCode
+        dCode: req.body.dCode
     };
-    connection.query(staff.deleteStaff(params), function (error, results, fields) {
+    connection.query(places.deletePlaces(params), function (error, results, fields) {
         if (results) {
             res.send({
                 data: {
@@ -221,7 +262,7 @@ router.post('/deleteStaff', function (req, res, next) {
                     message: "删除成功"
                 }
             })
-        } else {
+        } else if (error) {
             res.send({
                 data: {
                     code: -100,
