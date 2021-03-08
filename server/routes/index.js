@@ -32,10 +32,10 @@ router.post('/login', function(req, res, next) {
 	}
 	//查询用户名存在不存在
 	connection.query( user.queryUser( params ) , function (error, results, fields) {
-		if( results.length > 0 ){
+		if( results ){
       		// 查询密码是否正确
 			connection.query( user.queryUserPwd( params ) , function (err, result) {
-				if(  result.length > 0 ){
+				if(  result ){
 					res.send({
 						data:{
 						code: 200,
@@ -47,8 +47,9 @@ router.post('/login', function(req, res, next) {
 					res.send({
 						data:{
 							code: -100,
+							error: err,
 							message: "密码不正确"
-							}
+						}
 					})
 				}
 			})
@@ -56,6 +57,7 @@ router.post('/login', function(req, res, next) {
 			res.send({
 				data:{
 					code: -100,
+					error: error,
 					message: "用户名不存在"
 				}
 			})

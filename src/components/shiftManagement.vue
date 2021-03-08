@@ -1,11 +1,18 @@
 <template>
-<!-- 地点信息表 -->
+<!-- 调班信息表 -->
     <div class="user-container">
         <div class="filter-container">
-            <label for="searchName" class="filter-name">地点编号：</label>
-            <el-input id="searchName" v-model.trim="listQuery.dCode" style="padding-right:20px;" class="filter-input" placeholder="请输入" />
-            <label for="searchNickName" class="filter-name">地点名称：</label>
-            <el-input id="searchNickName" v-model.trim="listQuery.dName" class="filter-input" placeholder="请输入" />
+            <label for="searchName" class="filter-name">调班名称：</label>
+            <el-input id="searchName" v-model.trim="listQuery.tName" style="padding-right:20px;" class="filter-input" placeholder="请输入" />
+            <label for="searchNickName" class="filter-name">调班星期：</label>
+            <el-select v-model="listQuery.tDay" class="filter-input" clearable placeholder="请选择">
+                <el-option
+                v-for="item in weeks"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+                </el-option>
+            </el-select>
             <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">搜索</el-button>
             <el-button v-waves class="filter-item" type="success" icon="el-icon-edit" @click="handleAdd">添加</el-button>
             <el-button v-waves class="filter-item" type="danger" icon="el-icon-delete" @click="handleRemove">批量删除</el-button>
@@ -25,26 +32,26 @@
                 align="center"
                 width="50"
             />
-            <el-table-column label="地点编号" width="150" align="center">
+            <el-table-column label="调班名称" width="170" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.dCode }}</span>
+                    <span>{{ scope.row.tName }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="地点名称" width="200" align="center">
+            <el-table-column label="调班日期" width="200" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.dName }}</span>
+                    <span>{{ scope.row.tDate.slice(0, 10) }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="所属科室" width="300" align="center">
+            <el-table-column label="调班星期" width="200" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.kName }}</span>
+                    <span>{{ scope.row.tDay }}</span>
                 </template>
             </el-table-column>
-            <!-- <el-table-column label="地点图片" show-overflow-tooltip width="200" align="center">
+            <el-table-column label="调班班次" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.dImgUrlList }}</span>
+                    <span>{{ scope.row.tClasses }}</span>
                 </template>
-            </el-table-column> -->
+            </el-table-column>
             <el-table-column label="操作" width="150" align="center">
                 <template slot-scope="scope">
                 <el-button type="success" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
@@ -57,17 +64,31 @@
 
         <!-- 添加、编辑对话框 -->
         <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible" width="30%">
-            <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px" class="form">
-                <el-form-item label="地点编号:" prop="dCode">
-                    <el-input type="text" v-model="ruleForm.dCode" @blur='testDCode' autocomplete="off"></el-input>
+            <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="90px" class="form">
+                <el-form-item label="调班名称:" prop="tName">
+                    <el-input type="text" v-model="ruleForm.tName" @blur='testTName' autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="地点名称:" prop="dName">
-                    <el-input type="text" v-model="ruleForm.dName" @blur='testDName' autocomplete="off"></el-input>
+                <el-form-item label="调班日期:" prop="tDate">
+                    <el-date-picker
+                        v-model="ruleForm.tDate"
+                        type="date"
+                        @change="toWeek"
+                        placeholder="选择日期"
+                        format="yyyy 年 MM 月 dd 日"
+                        value-format="yyyy-MM-dd">
+                    </el-date-picker>
                 </el-form-item>
-                <el-form-item label="所属科室:" prop="kName">
-                    <el-select v-model="ruleForm.kName" placeholder="请选择">
+                <el-form-item label="调班星期:" prop="tDay" required>
+                    <el-input
+                    placeholder="请选择日期"
+                    v-model="ruleForm.tDay"
+                    :disabled="true">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="调班班次:" prop="tClasses" required>
+                    <el-select v-model="ruleForm.tClasses" placeholder="请选择">
                         <el-option
-                        v-for="item in kNameList"
+                        v-for="item in BNameList"
                         :key="item.value"
                         :label="item.label"
                         :value="item.value">
@@ -85,47 +106,49 @@
 
 <script>
 import {
-    addPlaces,
-    queryPlacesList,
-    queryAllKName,
-    testDCode,
-    testDName,
-    querySinglePlaces,
-    updatePlaces,
-    deletePlaces,
-} from '../api/places'
+    addShift,
+    queryShiftList,
+    queryAllBName,
+    testTName,
+    querySingleShift,
+    updateShift,
+    deleteShift,
+} from '../api/shift'
 import waves from '../directive/waves' // 按钮水波纹
 import Pagination from './Pagination/index' // secondary package based on el-pagination
 
 export default {
     data() {
-        var validateDCode = (rule, value, callback) => {
+        var validateTName = (rule, value, callback) => {
             setTimeout(() => {
-                if (this.isRegisteredDCode == 201) {
-                    callback(new Error('该地点编号已存在'));
-                    this.isRegisteredDCode = ''
+                if (this.isRegisteredTName == 201) {
+                    callback(new Error('该调班名称已存在'));
+                    this.isRegisteredTName = ''
                 } else if (value === '') {
-                    callback(new Error('请输入地点编号'));
+                    callback(new Error('请输入调班名称'));
                 } else {
                     callback();
                 }
             }, 500)
         };
-        var validateDName = (rule, value, callback) => {
-            setTimeout(() => {
-                if (this.isRegisteredDName == 201) {
-                    callback(new Error('该地点名称已存在'));
-                    this.isRegisteredDName = ''
-                } else if (value === '') {
-                    callback(new Error('请输入地点名称'));
-                } else {
-                    callback();
-                }
-            }, 500)
-        };
-        var validateKName = (rule, value, callback) => {
+        var validateTDate = (rule, value, callback) => {
             if (value === '') {
-                callback(new Error('请输入所属科室'));
+                callback(new Error('请选择调班日期'));
+            } else {
+                callback();
+            }
+        };
+        var validateTDay = (rule, value, callback) => {
+            console.log(this.ruleForm.tDay)
+            if (value === '') {
+                callback(new Error('请选择调班星期'));
+            } else {
+                callback();
+            }
+        };
+        var validateTClasses = (rule, value, callback) => {
+             if (value === '') {
+                callback(new Error('请选择调班班次'));
             } else {
                 callback();
             }
@@ -134,8 +157,8 @@ export default {
             list: [],
             total: 0,
             listQuery: {
-                dName: '',
-                kName: '',
+                tName: '',
+                tDay: '',
                 page: 1,
                 pageSize: 10
             },
@@ -144,20 +167,43 @@ export default {
             dialogTitle: '',
             // 添加、编辑表单验证
             ruleForm: {
-                dCode: '',
-                dName: '',
-                kName: '',
+                tName: '',
+                tDate: '',
+                tDay: '',
+                tClasses: '',
             },
             rules: {
-                dCode: [{ validator: validateDCode, trigger: 'blur' }],
-                dName: [{ validator: validateDName, trigger: 'blur' }],
-                // kName: [{ validator: validateKName, trigger: 'blur' }],
+                tName: [{ validator: validateTName, trigger: 'blur' }],
+                tDate: [{ validator: validateTDate, trigger: 'blur' }],
+                tDay: [{ validator: validateTDay, trigger: 'blur' }],
+                tClasses: [{ validator: validateTClasses, trigger: 'blur' }],
             }, 
             handle: '', // 当前操作
             currentDelete: '', // 当前删除(单个/批量)对象
-
-            kNameList: [],
-            selectedKName: ''
+            BNameList: [],
+            oldTName: '',
+            weeks: [{
+                value: '星期一',
+                label: '星期一'
+            }, {
+                value: '星期二',
+                label: '星期二'
+            }, {
+                value: '星期三',
+                label: '星期三'
+            }, {
+                value: '星期四',
+                label: '星期四'
+            }, {
+                value: '星期五',
+                label: '星期五'
+            }, {
+                value: '星期六',
+                label: '星期六'
+            }, {
+                value: '星期天',
+                label: '星期天'
+            }],
         }
     },
     watch: {
@@ -168,13 +214,13 @@ export default {
     directives: { waves },
     created() {
         this.getList()
-        queryAllKName().then(res => {
+        queryAllBName().then(res => {
             let data = res.data.data
             if (data.code == 200) {
                 data.data.forEach(item => {
-                    this.kNameList.push({
-                        value: item.kName,
-                        label: item.kName
+                    this.BNameList.push({
+                        value: item.bName,
+                        label: item.bName
                     })
                 })
             }
@@ -183,9 +229,37 @@ export default {
         }
     },
     methods: {
+        toWeek(val) {
+            this.ruleForm.tDay
+            let selectedTime = val;
+            let week = new Date(selectedTime).getDay()
+            switch (week) {
+                case 1:
+                    this.ruleForm.tDay = '星期一'
+                    break;
+                case 2:
+                    this.ruleForm.tDay = '星期二'
+                    break;
+                case 3:
+                    this.ruleForm.tDay = '星期三'
+                    break;
+                case 4:
+                    this.ruleForm.tDay = '星期四'
+                    break;
+                case 5:
+                    this.ruleForm.tDay = '星期五'
+                    break;
+                case 6:
+                    this.ruleForm.tDay = '星期六'
+                    break;
+                case 0:
+                    this.ruleForm.tDay = '星期天'
+                    break;
+            }
+        },
         getList() {
             this.listLoading = true
-            queryPlacesList(this.listQuery).then(res => {
+            queryShiftList(this.listQuery).then(res => {
                 let data = res.data.data
                 if (data.code == 200) {
                     this.listLoading = false
@@ -197,12 +271,12 @@ export default {
             }
         },
         handleSelectionChange(val) {
-            let dCodeList = []
+            let tNameList = []
             val.forEach(item => {
-                dCodeList.push(item.dCode)
+                tNameList.push(item.tName)
             })
             let str = ''
-            dCodeList.forEach(item => {
+            tNameList.forEach(item => {
                 str += ("'" + item + "',")
             })
             str = str.slice(0, str.lastIndexOf(','))
@@ -212,7 +286,7 @@ export default {
             this.listLoading = true
             this.listQuery.page = 1
             this.listQuery.pageSize = 10
-            queryPlacesList(this.listQuery).then(res => {
+            queryShiftList(this.listQuery).then(res => {
                 let data = res.data.data
                 if (data.code == 200) {
                     this.listLoading = false
@@ -228,9 +302,10 @@ export default {
             this.handle = 'add'
             this.dialogFormVisible = true
             this.ruleForm = {
-                dCode: '',
-                dName: '',
-                kName: '',
+                tName: '',
+                tDate: '',
+                tDay: '',
+                tClasses: '',
             }
         },
         handleRemove() {
@@ -240,7 +315,7 @@ export default {
                 type: 'warning'
             }).then(() => {
                 if (this.currentDelete != '') {
-                    deletePlaces({dCode: this.currentDelete}).then(res => {
+                    deleteShift({tName: this.currentDelete}).then(res => {
                         let data = res.data.data
                         if (data.code == 200) {
                             this.listLoading = false
@@ -270,18 +345,20 @@ export default {
             this.dialogTitle = '编辑'
             this.handle = 'edit'
             this.dialogFormVisible = true
-            this.ruleForm.dCode = val.dCode
-            this.ruleForm.dName = val.dName
-            this.ruleForm.kName = val.kName
+            this.ruleForm.tName = val.tName
+            this.ruleForm.tDate = val.tDate
+            this.ruleForm.tDay = val.tDay
+            this.ruleForm.tClasses = val.tClasses
+            this.oldTName = val.tName
         },
         handleDelete(val) {
-            this.currentDelete = "'" + val.dCode + "'"
+            this.currentDelete = "'" + val.tName + "'"
             this.$confirm('是否确定删除', '删除', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                deletePlaces({dCode: this.currentDelete}).then(res => {
+                deleteShift({tName: this.currentDelete}).then(res => {
                     let data = res.data.data
                     if (data.code == 200) {
                         this.listLoading = false
@@ -307,7 +384,7 @@ export default {
                     if (valid) {
                         this.dialogFormVisible = false
                         console.log('提交的表单', this.ruleForm)
-                        addPlaces(this.ruleForm).then(res => {
+                        addShift(this.ruleForm).then(res => {
                             let data = res.data.data
                             if (data.code == 200) {
                                 this.$message({
@@ -315,9 +392,10 @@ export default {
                                     type: 'success'
                                 });
                                 this.ruleForm = {
-                                    dCode: '',
-                                    dName: '',
-                                    kName: '',
+                                    tName: '',
+                                    tDate: '',
+                                    tDay: '',
+                                    tClasses: '',
                                 }
                                 this.getList()
                             }
@@ -330,8 +408,11 @@ export default {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         this.dialogFormVisible = false
+                        let tData = this.ruleForm.tDate.slice(0,8)+(JSON.parse(this.ruleForm.tDate.slice(8,10)) + 1)
+                        this.ruleForm.tDate = tData
+                        this.ruleForm.oldTName = this.oldTName
                         console.log('提交的表单', this.ruleForm)
-                        updatePlaces(this.ruleForm).then(res => {
+                        updateShift(this.ruleForm).then(res => {
                             let data = res.data.data
                             if (data.code == 200) {
                                 this.$message({
@@ -339,10 +420,12 @@ export default {
                                     type: 'success'
                                 });
                                 this.ruleForm = {
-                                    dCode: '',
-                                    dName: '',
-                                    kName: '',
+                                    tName: '',
+                                    tDate: '',
+                                    tDay: '',
+                                    tClasses: '',
                                 }
+                                this.oldTName = ''
                                 this.getList()
                             }
                         })
@@ -355,27 +438,20 @@ export default {
         },
         handleAddCancel() {
             this.dialogFormVisible = false
-        },
-        testDCode() {
-            if (this.ruleForm.dCode != '') {
-                testDCode({dCode: this.ruleForm.dCode}).then(res => {
-                    if (res.data.data.code == 201) {
-                        this.isRegisteredDCode = 201
-                    } else {
-                        this.isRegisteredDCode = ''
-                    }
-                })
+            this.ruleForm = {
+                tName: '',
+                tDate: '',
+                tDay: '',
+                tClasses: '',
             }
         },
-        testDName() {
-            if (this.ruleForm.dName != '') {
-                testDName({dName: this.ruleForm.dName}).then(res => {
+        testTName() {
+            if (this.ruleForm.tName != '') {
+                testTName({tName: this.ruleForm.tName}).then(res => {
                     if (res.data.data.code == 201) {
-                        this.isRegisteredDName = 201
-                    } else if (res.data.data.code == 300) {
-                        this.isRegisteredDName = 300
+                        this.isRegisteredTName = 201
                     } else {
-                        this.isRegisteredDName = ''
+                        this.isRegisteredTName = ''
                     }
                 })
             }

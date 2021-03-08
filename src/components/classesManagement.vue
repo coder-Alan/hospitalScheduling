@@ -1,11 +1,11 @@
 <template>
-<!-- 地点信息表 -->
+<!-- 班次信息表 -->
     <div class="user-container">
         <div class="filter-container">
-            <label for="searchName" class="filter-name">地点编号：</label>
-            <el-input id="searchName" v-model.trim="listQuery.dCode" style="padding-right:20px;" class="filter-input" placeholder="请输入" />
-            <label for="searchNickName" class="filter-name">地点名称：</label>
-            <el-input id="searchNickName" v-model.trim="listQuery.dName" class="filter-input" placeholder="请输入" />
+            <label for="searchName" class="filter-name">班次编号：</label>
+            <el-input id="searchName" v-model.trim="listQuery.bCode" style="padding-right:20px;" class="filter-input" placeholder="请输入" />
+            <label for="searchNickName" class="filter-name">班次名称：</label>
+            <el-input id="searchNickName" v-model.trim="listQuery.bName" class="filter-input" placeholder="请输入" />
             <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">搜索</el-button>
             <el-button v-waves class="filter-item" type="success" icon="el-icon-edit" @click="handleAdd">添加</el-button>
             <el-button v-waves class="filter-item" type="danger" icon="el-icon-delete" @click="handleRemove">批量删除</el-button>
@@ -25,26 +25,31 @@
                 align="center"
                 width="50"
             />
-            <el-table-column label="地点编号" width="150" align="center">
+            <el-table-column label="班次编号" width="120" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.dCode }}</span>
+                    <span>{{ scope.row.bCode }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="地点名称" width="200" align="center">
+            <el-table-column label="班次名称" width="170" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.dName }}</span>
+                    <span>{{ scope.row.bName }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="所属科室" width="300" align="center">
+            <el-table-column label="开始时间" width="200" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.kName }}</span>
+                    <span>{{ scope.row.bStartTime }}</span>
                 </template>
             </el-table-column>
-            <!-- <el-table-column label="地点图片" show-overflow-tooltip width="200" align="center">
+            <el-table-column label="结束时间" width="200" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.dImgUrlList }}</span>
+                    <span>{{ scope.row.bEndTime }}</span>
                 </template>
-            </el-table-column> -->
+            </el-table-column>
+            <el-table-column label="备注" align="center">
+                <template slot-scope="scope">
+                    <span>{{ scope.row.remarks }}</span>
+                </template>
+            </el-table-column>
             <el-table-column label="操作" width="150" align="center">
                 <template slot-scope="scope">
                 <el-button type="success" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
@@ -58,21 +63,30 @@
         <!-- 添加、编辑对话框 -->
         <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible" width="30%">
             <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px" class="form">
-                <el-form-item label="地点编号:" prop="dCode">
-                    <el-input type="text" v-model="ruleForm.dCode" @blur='testDCode' autocomplete="off"></el-input>
+                <el-form-item label="班次编号:" prop="bCode">
+                    <el-input type="text" v-model="ruleForm.bCode" @blur='testBCode' autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="地点名称:" prop="dName">
-                    <el-input type="text" v-model="ruleForm.dName" @blur='testDName' autocomplete="off"></el-input>
+                <el-form-item label="班次名称:" prop="bName">
+                    <el-input type="text" v-model="ruleForm.bName" @blur='testBName' autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="所属科室:" prop="kName">
-                    <el-select v-model="ruleForm.kName" placeholder="请选择">
-                        <el-option
-                        v-for="item in kNameList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                        </el-option>
-                    </el-select>
+                <el-form-item label="开始时间:" prop="bStartTime">
+                    <el-time-picker
+                        arrow-control
+                        v-model="ruleForm.bStartTime"
+                        value-format= 'HH:mm:ss'
+                        placeholder="开始时间">
+                    </el-time-picker>
+                </el-form-item>
+                <el-form-item label="结束时间:" prop="bEndTime">
+                    <el-time-picker
+                        arrow-control
+                        value-format= 'HH:mm:ss'
+                        v-model="ruleForm.bEndTime"
+                        placeholder="结束时间">
+                    </el-time-picker>
+                </el-form-item>
+                <el-form-item label="备注:" prop="remarks">
+                    <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="ruleForm.remarks" autocomplete="off"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -85,47 +99,53 @@
 
 <script>
 import {
-    addPlaces,
-    queryPlacesList,
-    queryAllKName,
-    testDCode,
-    testDName,
-    querySinglePlaces,
-    updatePlaces,
-    deletePlaces,
-} from '../api/places'
+    addClasses,
+    queryClassesList,
+    testBCode,
+    testBName,
+    querySingleClasses,
+    updateClasses,
+    deleteClasses,
+} from '../api/classes'
 import waves from '../directive/waves' // 按钮水波纹
 import Pagination from './Pagination/index' // secondary package based on el-pagination
 
 export default {
     data() {
-        var validateDCode = (rule, value, callback) => {
+        var validateBCode = (rule, value, callback) => {
             setTimeout(() => {
-                if (this.isRegisteredDCode == 201) {
-                    callback(new Error('该地点编号已存在'));
-                    this.isRegisteredDCode = ''
+                if (this.isRegisteredBCode == 201) {
+                    callback(new Error('该班次编号已存在'));
+                    this.isRegisteredBCode = ''
                 } else if (value === '') {
-                    callback(new Error('请输入地点编号'));
+                    callback(new Error('请输入班次编号'));
                 } else {
                     callback();
                 }
             }, 500)
         };
-        var validateDName = (rule, value, callback) => {
+        var validateBName = (rule, value, callback) => {
             setTimeout(() => {
-                if (this.isRegisteredDName == 201) {
-                    callback(new Error('该地点名称已存在'));
-                    this.isRegisteredDName = ''
+                if (this.isRegisteredBName == 201) {
+                    callback(new Error('该班次名称已存在'));
+                    this.isRegisteredBName = ''
                 } else if (value === '') {
-                    callback(new Error('请输入地点名称'));
+                    callback(new Error('请输入班次名称'));
                 } else {
                     callback();
                 }
             }, 500)
         };
-        var validateKName = (rule, value, callback) => {
+        var validateBStartTime = (rule, value, callback) => {
             if (value === '') {
-                callback(new Error('请输入所属科室'));
+                callback(new Error('请输入开始时间'));
+            } else {
+                callback();
+            }
+        };
+        var validateBEndTime = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('请输入结束时间'));
             } else {
                 callback();
             }
@@ -134,8 +154,8 @@ export default {
             list: [],
             total: 0,
             listQuery: {
-                dName: '',
-                kName: '',
+                bCode: '',
+                bName: '',
                 page: 1,
                 pageSize: 10
             },
@@ -144,20 +164,20 @@ export default {
             dialogTitle: '',
             // 添加、编辑表单验证
             ruleForm: {
-                dCode: '',
-                dName: '',
-                kName: '',
+                bCode: '',
+                bName: '',
+                bStartTime: '',
+                bEndTime: '',
+                remarks: '',
             },
             rules: {
-                dCode: [{ validator: validateDCode, trigger: 'blur' }],
-                dName: [{ validator: validateDName, trigger: 'blur' }],
-                // kName: [{ validator: validateKName, trigger: 'blur' }],
+                bCode: [{ validator: validateBCode, trigger: 'blur' }],
+                bName: [{ validator: validateBName, trigger: 'blur' }],
+                bStartTime: [{ validator: validateBStartTime, trigger: 'blur' }],
+                bEndTime: [{ validator: validateBEndTime, trigger: 'blur' }],
             }, 
             handle: '', // 当前操作
             currentDelete: '', // 当前删除(单个/批量)对象
-
-            kNameList: [],
-            selectedKName: ''
         }
     },
     watch: {
@@ -168,24 +188,11 @@ export default {
     directives: { waves },
     created() {
         this.getList()
-        queryAllKName().then(res => {
-            let data = res.data.data
-            if (data.code == 200) {
-                data.data.forEach(item => {
-                    this.kNameList.push({
-                        value: item.kName,
-                        label: item.kName
-                    })
-                })
-            }
-        }), (err) => {
-            console.log(err)
-        }
     },
     methods: {
         getList() {
             this.listLoading = true
-            queryPlacesList(this.listQuery).then(res => {
+            queryClassesList(this.listQuery).then(res => {
                 let data = res.data.data
                 if (data.code == 200) {
                     this.listLoading = false
@@ -197,12 +204,12 @@ export default {
             }
         },
         handleSelectionChange(val) {
-            let dCodeList = []
+            let bCodeList = []
             val.forEach(item => {
-                dCodeList.push(item.dCode)
+                bCodeList.push(item.bCode)
             })
             let str = ''
-            dCodeList.forEach(item => {
+            bCodeList.forEach(item => {
                 str += ("'" + item + "',")
             })
             str = str.slice(0, str.lastIndexOf(','))
@@ -212,7 +219,7 @@ export default {
             this.listLoading = true
             this.listQuery.page = 1
             this.listQuery.pageSize = 10
-            queryPlacesList(this.listQuery).then(res => {
+            queryClassesList(this.listQuery).then(res => {
                 let data = res.data.data
                 if (data.code == 200) {
                     this.listLoading = false
@@ -228,9 +235,11 @@ export default {
             this.handle = 'add'
             this.dialogFormVisible = true
             this.ruleForm = {
-                dCode: '',
-                dName: '',
-                kName: '',
+                bCode: '',
+                bName: '',
+                bStartTime: '',
+                bEndTime: '',
+                remarks: '',
             }
         },
         handleRemove() {
@@ -240,7 +249,7 @@ export default {
                 type: 'warning'
             }).then(() => {
                 if (this.currentDelete != '') {
-                    deletePlaces({dCode: this.currentDelete}).then(res => {
+                    deleteClasses({bCode: this.currentDelete}).then(res => {
                         let data = res.data.data
                         if (data.code == 200) {
                             this.listLoading = false
@@ -270,18 +279,20 @@ export default {
             this.dialogTitle = '编辑'
             this.handle = 'edit'
             this.dialogFormVisible = true
-            this.ruleForm.dCode = val.dCode
-            this.ruleForm.dName = val.dName
-            this.ruleForm.kName = val.kName
+            this.ruleForm.bCode = val.bCode
+            this.ruleForm.bName = val.bName
+            this.ruleForm.bStartTime = val.bStartTime
+            this.ruleForm.bEndTime = val.bEndTime
+            this.ruleForm.remarks = val.remarks
         },
         handleDelete(val) {
-            this.currentDelete = "'" + val.dCode + "'"
+            this.currentDelete = "'" + val.bCode + "'"
             this.$confirm('是否确定删除', '删除', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                deletePlaces({dCode: this.currentDelete}).then(res => {
+                deleteClasses({bCode: this.currentDelete}).then(res => {
                     let data = res.data.data
                     if (data.code == 200) {
                         this.listLoading = false
@@ -307,7 +318,7 @@ export default {
                     if (valid) {
                         this.dialogFormVisible = false
                         console.log('提交的表单', this.ruleForm)
-                        addPlaces(this.ruleForm).then(res => {
+                        addClasses(this.ruleForm).then(res => {
                             let data = res.data.data
                             if (data.code == 200) {
                                 this.$message({
@@ -315,9 +326,11 @@ export default {
                                     type: 'success'
                                 });
                                 this.ruleForm = {
-                                    dCode: '',
-                                    dName: '',
-                                    kName: '',
+                                    bCode: '',
+                                    bName: '',
+                                    bStartTime: '',
+                                    bEndTime: '',
+                                    remarks: '',
                                 }
                                 this.getList()
                             }
@@ -331,7 +344,7 @@ export default {
                     if (valid) {
                         this.dialogFormVisible = false
                         console.log('提交的表单', this.ruleForm)
-                        updatePlaces(this.ruleForm).then(res => {
+                        updateClasses(this.ruleForm).then(res => {
                             let data = res.data.data
                             if (data.code == 200) {
                                 this.$message({
@@ -339,9 +352,11 @@ export default {
                                     type: 'success'
                                 });
                                 this.ruleForm = {
-                                    dCode: '',
-                                    dName: '',
-                                    kName: '',
+                                    bCode: '',
+                                    bName: '',
+                                    bStartTime: '',
+                                    bEndTime: '',
+                                    remarks: '',
                                 }
                                 this.getList()
                             }
@@ -355,27 +370,34 @@ export default {
         },
         handleAddCancel() {
             this.dialogFormVisible = false
+            this.ruleForm = {
+                bCode: '',
+                bName: '',
+                bStartTime: '',
+                bEndTime: '',
+                remarks: '',
+            }
         },
-        testDCode() {
-            if (this.ruleForm.dCode != '') {
-                testDCode({dCode: this.ruleForm.dCode}).then(res => {
+        testBCode() {
+            if (this.ruleForm.bCode != '') {
+                testBCode({bCode: this.ruleForm.bCode}).then(res => {
                     if (res.data.data.code == 201) {
-                        this.isRegisteredDCode = 201
+                        this.isRegisteredBCode = 201
                     } else {
-                        this.isRegisteredDCode = ''
+                        this.isRegisteredBCode = ''
                     }
                 })
             }
         },
-        testDName() {
-            if (this.ruleForm.dName != '') {
-                testDName({dName: this.ruleForm.dName}).then(res => {
+        testBName() {
+            if (this.ruleForm.bName != '') {
+                testBName({bName: this.ruleForm.bName}).then(res => {
                     if (res.data.data.code == 201) {
-                        this.isRegisteredDName = 201
+                        this.isRegisteredBName = 201
                     } else if (res.data.data.code == 300) {
-                        this.isRegisteredDName = 300
+                        this.isRegisteredBName = 300
                     } else {
-                        this.isRegisteredDName = ''
+                        this.isRegisteredBName = ''
                     }
                 })
             }
