@@ -1,6 +1,6 @@
 # crm
 
-> crm后台管理系统
+> 医院排班管理系统
 
 ## Build Setup
 
