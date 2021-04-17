@@ -11,6 +11,7 @@ var roomRouter = require('./routes/room');
 var placesRouter = require('./routes/places');
 var classesRouter = require('./routes/classes');
 var shiftRouter = require('./routes/shift');
+var dutyRouter = require('./routes/duty');
 
 var app = express();
 
@@ -31,6 +32,7 @@ app.use('/room', roomRouter);
 app.use('/places', placesRouter);
 app.use('/classes', classesRouter);
 app.use('/shift', shiftRouter);
+app.use('/duty', dutyRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

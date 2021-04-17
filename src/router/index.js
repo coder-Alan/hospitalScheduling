@@ -7,6 +7,12 @@ import roomManagement from '../components/roomManagement.vue';
 import placesManagement from '../components/placesManagement';
 import classesManagement from '../components/classesManagement';
 import shiftManagement from '../components/shiftManagement';
+import dutyManagement from '../components/dutyManagement';
+
+/* const routerPush = Router.prototype.push;
+Router.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error=> error)
+}; */
 
 Vue.use(Router);
 
@@ -18,39 +24,45 @@ const routes = [
     },
     {
         path: '/userManagement',
-        enname: 'userManagement',
+        ename: 'userManagement',
         name: '用户信息管理',
         component: userManagement,
     },
     {
         path: '/staffManagement',
-        enname: 'staffManagement',
+        ename: 'staffManagement',
         name: '员工信息管理',
         component: staffManagement,
     },
     {
         path: '/roomManagement',
-        enname: 'roomManagement',
+        ename: 'roomManagement',
         name: '科室信息管理',
         component: roomManagement,
     },
     {
         path: '/placesManagement',
-        enname: 'placesManagement',
+        ename: 'placesManagement',
         name: '地点信息管理',
         component: placesManagement,
     },
     {
         path: '/classesManagement',
-        enname: 'classesManagement',
+        ename: 'classesManagement',
         name: '班次信息管理',
         component: classesManagement,
     },
     {
         path: '/shiftManagement',
-        enname: 'shiftManagement',
+        ename: 'shiftManagement',
         name: '调班信息管理',
         component: shiftManagement,
+    },
+    {
+        path: '/dutyManagement',
+        ename: 'dutyManagement',
+        name: '值班信息管理',
+        component: dutyManagement,
     },
 ];
 

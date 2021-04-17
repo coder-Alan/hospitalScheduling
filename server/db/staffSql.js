@@ -5,6 +5,8 @@ var staff = {
             return "SELECT * FROM table_staff WHERE yCode = '" + param.yCode + "'";
         } else if (param.yName) {
             return "SELECT * FROM table_staff WHERE yName = '" + param.yName + "'";
+        } else if (param.uCode) {
+            return "SELECT * FROM table_staff WHERE uCode = '" + param.uCode + "'";
         } else {
             return "SELECT yCode,uCode,yName,ySex,yCategory,yTitle,yDepartment,yPhone,yImgUrl FROM table_staff LIMIT 10 OFFSET " + param.page + "";
         }

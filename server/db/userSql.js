@@ -67,7 +67,7 @@ var user = {
 	},
 	// 修改用户信息
 	updateUser(params) {
-		return "update table_user set uName='" + params.uName + "', uPassword='" + params.uPassword + "', uNickName='" + params.uNickName + "', uPhone='" + params.uPhone + "', uPower='" + params.uPower + "' WHERE uName='" + params.uName +"'";
+		return "update table_user set uName='" + params.uName + "', uPassword='" + params.uPassword + "', uNickName='" + params.uNickName + "', uPhone='" + params.uPhone + "', uPower='" + params.uPower + "' WHERE uCode='" + 2 +"'";
 	},
 	deleteUser(params) {
 		return "DELETE FROM `table_user` WHERE uName in (" +params.uName+")";

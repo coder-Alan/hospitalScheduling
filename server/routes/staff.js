@@ -18,9 +18,16 @@ router.get('/', function (req, res, next) {
 
 // 查询单个员工
 router.post('/querySingleStaff', function (req, res, next) {
-    let params = {
-        yCode: req.body.yCode
-    };
+    let params;
+    if (req.body.yCode) {
+        params = {
+            yCode: req.body.yCode
+        };
+    } else if (req.body.uCode) {
+        params = {
+            uCode: req.body.uCode
+        };
+    }
     connection.query(staff.queryStaff(params), function (error, results, fields) {
         if (results.length > 0) {
             res.send({

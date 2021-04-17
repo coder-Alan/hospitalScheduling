@@ -16,7 +16,7 @@
             <i v-show="isCollapse" class="el-icon-office-building"></i>
             <span class="leftNav-header">康德医院排班管理系统</span>
           </el-menu-item>
-          <el-menu-item :index="item.enname" v-for="(item,index) in menu" :key="index">
+          <el-menu-item :index="item.ename" v-for="(item,index) in menu" :key="index">
             <i :class="item.icon"></i>
             <span>{{item.name}}</span>
           </el-menu-item>
