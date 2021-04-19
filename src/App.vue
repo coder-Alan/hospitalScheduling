@@ -1,6 +1,7 @@
 <template>
   <div id="app" class="app">
-    <el-container>
+    <Schedule v-show="scheduleTab" />
+    <el-container v-show="!scheduleTab">
       <el-aside width="auto">
         <el-menu
           v-if="menu"
@@ -50,6 +51,7 @@
 <script>
 import {getPower} from './api/user'
 import {mapMutations} from 'vuex'
+import Schedule from '../src/components/schedule'
 
 export default {
   name: 'app',
@@ -58,7 +60,11 @@ export default {
       menu: [],
       isCollapse: true,
       activeName: 'first',
+      scheduleTab: true
     }
+  },
+  components: {
+    Schedule
   },
   created() {
     this.init()

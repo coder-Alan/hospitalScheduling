@@ -49,6 +49,27 @@ function querySingleUser(data) {
     )
 }
 
+function queryWorkTimes(data) {
+    return axios.post(
+        http + '/users/queryWorkTimes',
+        data
+    )
+}
+
+function inserWorkTimes(data) {
+    return axios.post(
+        http + '/users/inserWorkTimes',
+        data
+    )
+}
+
+function updateWorkTimes(data) {
+    return axios.post(
+        http + '/users/updateWorkTimes',
+        data
+    )
+}
+
 function updateUser(data) {
     return axios.post(
         http + '/users/updateUser',
@@ -71,6 +92,9 @@ export {
     testName,
     testNickName,
     querySingleUser,
+    queryWorkTimes,
+    inserWorkTimes,
+    updateWorkTimes,
     updateUser,
     deleteUser,
 }

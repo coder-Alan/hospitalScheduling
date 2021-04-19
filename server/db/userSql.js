@@ -26,6 +26,18 @@ var user = {
 	queryUserPwd(param) {
 		return "SELECT * FROM table_user WHERE uName = '"+param.uName+"' and uPassword = '"+param.uPassword+"' ";
 	},
+	// 查询工作时间
+	queryWorkTimes(param) {
+		return "SELECT * FROM table_work_times WHERE yCode = '"+param.yCode+"' ";
+	},
+	// 添加工作时间
+	inserWorkTimes(param) {
+		return "insert into table_work_times (yCode,startTime,endTime,workDate) values ('"+param.yCode+"','"+param.startTime+"','"+param.endTime+"','"+param.workDate+"')";
+	},
+	// 更新工作时间
+	updateWorkTimes(param) {
+		return "update table_work_times set startTime='" + param.startTime + "', endTime='" + param.endTime + "', workDate='" + param.workDate + "' WHERE yCode='" + param.yCode +"'";
+	},
 	// 增加一条用户数据
 	inserData(param) {
 		// 利用jsonwebtoken生成token

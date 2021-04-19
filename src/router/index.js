@@ -18,7 +18,7 @@ Vue.use(Router);
 
 const routes = [
     {
-        path: '/personalManagement',
+        path: '/',
         name: 'personalManagement',
         component: index
     },

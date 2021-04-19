@@ -102,8 +102,18 @@
                     <el-input type="text" v-model="ruleForm.yTitle" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="所属科室:" prop="yDepartment">
-                    <el-input type="text" v-model="ruleForm.yDepartment" autocomplete="off"></el-input>
+                    <el-select v-model="ruleForm.yDepartment" placeholder="请选择">
+                        <el-option
+                        v-for="item in kNameList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
+                <!-- <el-form-item label="所属科室:" prop="yDepartment">
+                    <el-input type="text" v-model="ruleForm.yDepartment" autocomplete="off"></el-input>
+                </el-form-item> -->
                 <el-form-item label="手机号码:" prop="yPhone">
                     <el-input type="text" v-model="ruleForm.yPhone" autocomplete="off"></el-input>
                 </el-form-item>
@@ -129,6 +139,7 @@ import {
     updateStaff,
     deleteStaff
 } from '../api/staff'
+import { queryAllKName } from '../api/places'
 import waves from '../directive/waves' // 按钮水波纹
 import Pagination from './Pagination/index' // secondary package based on el-pagination
 
@@ -230,6 +241,7 @@ export default {
             },
             handle: '', // 当前操作
             currentDelete: '', // 当前删除(单个/批量)对象
+            kNameList: [],
         }
     },
     watch: {
@@ -250,6 +262,19 @@ export default {
                     this.listLoading = false
                     this.list = data.data
                     this.total = data.total
+                }
+            }), (err) => {
+                console.log(err)
+            }
+            queryAllKName().then(res => {
+                let data = res.data.data
+                if (data.code == 200) {
+                    data.data.forEach(item => {
+                        this.kNameList.push({
+                            value: item.kName,
+                            label: item.kName
+                        })
+                    })
                 }
             }), (err) => {
                 console.log(err)
