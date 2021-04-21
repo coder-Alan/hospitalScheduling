@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="app">
-    <Schedule v-show="scheduleTab" />
+    <Schedule :userName='userName' v-show="scheduleTab" />
     <el-container v-show="!scheduleTab">
       <el-aside width="auto">
         <el-menu
@@ -34,23 +34,35 @@
         </el-menu>
       </el-aside>
       <el-container>
-        <el-header style="height:50px;">
+        <el-header class="app-header">
           <el-radio-group v-model="isCollapse" size="small">
             <el-radio-button :label="false">展开</el-radio-button>
             <el-radio-button :label="true">收起</el-radio-button>
           </el-radio-group>
+          <div class="schedule-tab" @mouseenter="headEnter">
+            <img src="./assets/image/head-portrait.jpg" alt="">
+          </div>
         </el-header>
         <el-main class="app-main">
           <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
+    <div class="enter-fixed">
+      <div class="enter-system" v-show="isEnter" @mouseleave="headLeave">
+        <div>{{userName}}，欢迎您</div>
+        <div>
+          <el-button @click="backHome" size="small" type="success" plain>返回首页</el-button>
+          <el-button @click="loginOut" size="small" type="primary" plain>退出登录</el-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import {getPower} from './api/user'
-import {mapMutations} from 'vuex'
+import {mapMutations, mapGetters} from 'vuex'
 import Schedule from '../src/components/schedule'
 
 export default {
@@ -60,7 +72,9 @@ export default {
       menu: [],
       isCollapse: true,
       activeName: 'first',
-      scheduleTab: true
+      scheduleTab: true,
+      isEnter: false,
+      userName: ''
     }
   },
   components: {
@@ -71,21 +85,34 @@ export default {
   },
   mounted() {
   },
+  computed: {
+    ...mapGetters(['isLogin'])
+  },
   methods: {
-    ...mapMutations(['setMenu']),
+    ...mapMutations(['setMenu', 'setIsLogin']),
     init() {
-      getPower({
-        uPower: localStorage.userPower
-      }).then(res => {
-        let data = res.data.data
-        if (data.code == 200) {
-          console.log(data.data)
-          this.menu = data.data
-          this.setMenu(data.data)
+      if (location.search.indexOf('isLogin') != -1) {
+        let param = location.search.slice(location.search.indexOf('=')+1, location.search.length)
+        if (param) {
+          this.setIsLogin(true)
         }
-      }), (err) => {
-        console.log(err)
-        location.href = './login.html'
+      }
+      if (localStorage.getItem('userName')) {
+        this.userName = localStorage.getItem('userName')
+        getPower({
+          uPower: localStorage.userPower
+        }).then(res => {
+          let data = res.data.data
+          if (data.code == 200) {
+            console.log(data.data)
+            this.menu = data.data
+            this.setMenu(data.data)
+          }
+        }), (err) => {
+          console.log(err)
+          // location.href = './login.html'
+          this.loginOut()
+        }
       }
     },
     handleClick() {
@@ -99,6 +126,22 @@ export default {
         }
         this.beforeNav = val
       }
+    },
+    headEnter() {
+      this.isEnter = true
+    },
+    headLeave() {
+      this.isEnter = false
+    },
+    backHome() {
+      this.isEnter = false
+      this.scheduleTab = true
+      location.href = '/?isLogin=1'
+    },
+    loginOut() {
+      localStorage.clear()
+      this.setIsLogin(false)
+      location.href = './'
     }
   },
 }
@@ -139,5 +182,55 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.app-header {
+  height:50px;
+}
+.app-header .schedule-tab {
+  width: 50px;
+  height: 50px;
+  margin-right: 30px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  overflow: hidden;
+  cursor: pointer;
+}
+.app-header .schedule-tab img {
+  width: 50px;
+  height: 50px;
+}
+.enter-fixed {
+  position: fixed;
+  right: 20px;
+  top: 60px;
+}
+.enter-system {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 200px;
+  height: 200px;
+  margin-top: 15px;
+  border-radius: 20px;
+  border: 3px solid rgb(176, 194, 212);
+  background: rgba(59, 147, 235, 1);
+  overflow: hidden;
+  z-index: 999;
+}
+.enter-system::before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  right: 60px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 15px solid rgb(176, 194, 212);
+}
+.enter-system div:first-child {
+    color: #fff;
+    padding-bottom: 30px;
 }
 </style>

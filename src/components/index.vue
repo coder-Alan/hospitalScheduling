@@ -167,7 +167,7 @@ export default {
                 this.startTime = '已超过打卡时间,请及时处理'
                 this.clockActive = 1
             } */
-            if (localStorage.getItem('userName') != 'admin') {
+            if (localStorage.getItem('userName') && localStorage.getItem('userName') != 'admin') {
                 this.getStaffMessage()
                 this.getCurrentTime()
                 let myDate = new Date();

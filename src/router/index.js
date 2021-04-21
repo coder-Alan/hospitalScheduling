@@ -18,8 +18,9 @@ Vue.use(Router);
 
 const routes = [
     {
-        path: '/',
-        name: 'personalManagement',
+        path: '/personalManagement',
+        ename: 'personalManagement',
+        name: '个人信息管理',
         component: index
     },
     {

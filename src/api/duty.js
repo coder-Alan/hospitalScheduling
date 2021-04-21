@@ -1,6 +1,13 @@
 import axios from 'axios';
 import { http } from '../static/config';
 
+function queryAllDutyList(data) {
+    return axios.post(
+        http + '/duty/queryAllDutyList',
+        data
+    )
+}
+
 function addDuty(data) {
     return axios.post(
         http + '/duty/addDuty',
@@ -57,6 +64,7 @@ function deleteDuty(data) {
 }
 
 export {
+    queryAllDutyList,
     addDuty,
     queryDutyList,
     testZCode,

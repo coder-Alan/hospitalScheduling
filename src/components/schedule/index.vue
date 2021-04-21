@@ -6,11 +6,23 @@
                 <img src="../../assets/image/head-portrait.jpg" alt="">
             </div>
         </div>
-        <div class="enter-system" v-show="isEnter" @mousemove="headEnter" @mouseleave="headLeave">
-            <div>
-                <el-button @click="enterSystem" size="small" type="success" plain>进入系统</el-button>
-                <el-button size="small" type="primary" plain>退出登录</el-button>
+        <div class="schedule-fixed">
+            <template v-if="isLogin">
+                <div class="schedule-system" v-show="isEnter" @mouseleave="headLeave">
+                    <div>{{userName}}，欢迎您</div>
+                    <div>
+                        <el-button @click="enterSystem" size="small" type="success" plain>进入系统</el-button>
+                        <el-button @click="loginOut" size="small" type="primary" plain>退出登录</el-button>
+                    </div>
+                </div>
+            </template>
+            <template v-else>
+                <div class="schedule-system-login" v-show="isEnter" @mouseleave="headLeave">
+                <div>
+                    <el-button @click="loginIn" size="small" type="success" plain>登录</el-button>
+                </div>
             </div>
+            </template>
         </div>
         <div class="table-container">
             <table border="1" class="table-border">
@@ -24,71 +36,92 @@
                         </tr>
                     </th>
                 </tr>
-                <tr align = center>
-                    <td height = 100px >内科</td>
-                    <td height = 100px >小张</td>
+                <tr align = center v-for="(item, index) in dutyList" :key="index">
+                    <td height = 100px >{{item.kName}}</td>
+                    <td height = 100px >{{item.yName}}</td>
                     <td>
                         <tr class="table-tr">
-                            <td class="table-td-td" v-for="(item, index) in num" :key="index">上午</td>
+                            <td class="table-td-td" v-for="(i, idx) in item.class" :key="idx">{{i.length>0?i[0]:''}}</td>
                         </tr>
                         <tr class="table-tr">
-                            <td class="table-td-td" v-for="(item, index) in num" :key="index">下午</td>
+                            <td class="table-td-td" v-for="(i, idx) in item.class" :key="idx">{{i.length>1?i[1]:''}}</td>
                         </tr>
                     </td>
                 </tr>
-                <!-- <tr height = 20px align = center>   
-                    <td>1</td><td v-for="(item, index) in num" :key="index"><span class="has-class" @click="classDetails">有课</span></td>
-                </tr>
-                <tr height = 20px align = center>   
-                    <td>2</td><td><span class="has-class">有课</span></td>
-                </tr> -->
             </table>
         </div>
     </div>
 </template>
 
 <script>
+import {mapMutations, mapGetters} from 'vuex'
+import { queryStaffList } from '../../api/staff'
+import { queryAllDutyList } from '../../api/duty'
 export default {
     name: 'timeTable',
     data() {
         return {
-            pickerOptions: {
-                shortcuts: [{
-                    text: '最近一周',
-                    onClick(picker) {
-                    const end = new Date();
-                    const start = new Date();
-                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-                    picker.$emit('pick', [start, end]);
-                    }
-                }, {
-                    text: '最近一个月',
-                    onClick(picker) {
-                    const end = new Date();
-                    const start = new Date();
-                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-                    picker.$emit('pick', [start, end]);
-                    }
-                }, {
-                    text: '最近三个月',
-                    onClick(picker) {
-                    const end = new Date();
-                    const start = new Date();
-                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-                    picker.$emit('pick', [start, end]);
-                    }
-                }]
-            },
-            timeValue: '',
-            num: 7,
             week: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
-            isEnter: false
+            isEnter: false,
+            staffList: [],
+            dutyList: []
         }
     },
-    props: ['packUp'],
+    props: ['packUp', 'userName'],
+    computed: {
+        ...mapGetters(['isLogin'])
+    },
     created() {
+        this.init()
     },
     methods: {
+        ...mapMutations(['setIsLogin']),
+        init() {
+            this.getRoomList()
+        },
+        // 获取所有的科室列表
+        getRoomList() {
+            let listQuery = {
+                yCode: '',
+                yName: '',
+                page: 1,
+                pageSize: 999
+            }
+            queryStaffList(listQuery).then(res => {
+                let data = res.data.data
+                if (data.code === 200) {
+                    data.data.forEach(item => {
+                        if (item.yName != '超级管理员') {
+                            this.staffList.push(item.yName)
+                        }
+                    })
+                    queryAllDutyList({staffList: this.staffList}).then(ress => {
+                        let dutyData = ress.data.data
+                        if (dutyData.code === 200) {
+                            let dutyList = dutyData.data
+                            console.log(333, dutyList)
+                            dutyList.forEach(item => {
+                                let oneClass = []
+                                this.week.forEach(day => {
+                                    let one = []
+                                    item.dutyList.forEach(days => {
+                                        if (day == days.zDay) {
+                                            one.push(days.zClasses)
+                                        }
+                                    })
+                                    oneClass.push(one)
+                                })
+                                item.class = oneClass
+                            });
+                            console.log(dutyList)
+                            this.dutyList = dutyList
+                        }
+                    })
+                }
+            }), (err) => {
+                console.log(err)
+            }
+        },
         headEnter() {
             this.isEnter = true
         },
@@ -97,6 +130,16 @@ export default {
         },
         enterSystem() {
             this.$parent.scheduleTab = false
+            this.isEnter = false
+            location.href = './?isLogin=1#/personalManagement'
+        },
+        loginOut() {
+            localStorage.clear()
+            this.setIsLogin(false)
+            location.href = './'
+        },
+        loginIn() {
+            location.href = './login.html'
         }
     },
 }
@@ -130,6 +173,7 @@ export default {
 .table-header .schedule-tab {
     width: 50px;
     height: 50px;
+    border: 1px solid #ccc;
     border-radius: 50%;
     overflow: hidden;
     cursor: pointer;
@@ -138,20 +182,63 @@ export default {
     width: 50px;
     height: 50px;
 }
-.enter-system {
+.schedule-fixed {
+    position: fixed;
+    right: 50px;
+    top: 70px;
+    z-index: 999;
+}
+.schedule-system {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed;
-    right: 20px;
-    top: 70px;
+    flex-direction: column;
     width: 200px;
     height: 200px;
+    margin-top: 15px;
     border-radius: 20px;
-    border: 1px solid #ccc;
-    background: #3b93eb;
+    border: 3px solid rgb(176, 194, 212);
+    background: rgba(59, 147, 235, 1);
     overflow: hidden;
-    z-index: 999;
+}
+.schedule-system div:first-child {
+    color: #fff;
+    padding-bottom: 30px;
+}
+.schedule-system::before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  right: 60px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 15px solid rgb(176, 194, 212);
+}
+.schedule-system-login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 200px;
+    height: 100px;
+    margin-top: 15px;
+    border-radius: 20px;
+    border: 3px solid rgb(176, 194, 212);
+    background: rgba(59, 147, 235, 1);
+    overflow: hidden;
+}
+.schedule-system-login::before {
+  content: '';
+  position: absolute;
+  top: 0px;
+  right: 60px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 15px solid rgb(176, 194, 212);
 }
 .table-container {
     position: relative;

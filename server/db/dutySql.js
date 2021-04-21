@@ -1,5 +1,5 @@
 var duty = {
-    // 查询地点
+    // 查询值班信息
     queryDuty(param) {
         if (param.zCode && param.zPeople) {
             return "SELECT * FROM table_duty WHERE zCode = '" + param.zCode + "' OR zPeople = '" + param.zPeople + "'";
@@ -11,7 +11,7 @@ var duty = {
             return "SELECT * FROM table_duty LIMIT 10 OFFSET " + param.page + "";
         }
     },
-    // 查询地点条数
+    // 查询值班条数
     queryDutyTotal() {
         return "SELECT COUNT(*) FROM table_duty";
     },
@@ -34,7 +34,7 @@ var duty = {
 
         return "INSERT INTO table_duty (zCode,zPeople,zRoom,zPlaces,zDay,zClasses,remarks) VALUES ('" + zCode + "','" + zPeople + "','" + zRoom + "','" + zPlaces + "','" + zDay + "','" + zClasses + "','"  + remarks + "')";
     },
-    // 修改地点信息
+    // 修改值班信息
     updateDuty(params) {
         return "UPDATE table_duty SET zCode='" + params.zCode + "', zPeople='" + params.zPeople + "', zRoom='" + params.zRoom + "', zPlaces='" + params.zPlaces + "', zDay='" + params.zDay + "', zClasses='" + params.zClasses + "', remarks='" + params.remarks + "' WHERE zCode='" + params.zCode + "'";
     },

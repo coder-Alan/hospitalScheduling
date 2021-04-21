@@ -16,6 +16,58 @@ router.get('/', function (req, res, next) {
     res.send('respond with a resource');
 });
 
+//查询所有员工对应的值班列表
+router.post('/queryAllDutyList', function (req, res, next) {
+    let staffList = req.body.staffList
+    new Promise(async (ress, rej) => {
+        let dutyList = []
+        for (let i = 0; i < staffList.length; i++) {
+            let params = {
+                zPeople: staffList[i]
+            }
+            await connection.query(duty.queryDuty(params), function (error, results, fields) {
+                if (results.length > 0) {
+                    let oneObj = {
+                        yName: '',
+                        kName: '',
+                        dutyList: []
+                    }
+                    for (let j = 0; j < results.length; j++) {
+                        if (j === 0) {
+                            oneObj.yName = results[j].zPeople
+                            oneObj.kName = results[j].zRoom
+                        }
+                        oneObj.dutyList.push({
+                            zDay: results[j].zDay,
+                            zClasses: results[j].zClasses
+                        })
+                    }
+                    dutyList.push(oneObj)
+                }
+            })
+        }
+        setTimeout(() => {
+            ress(dutyList)
+        }, 500)
+    }).then(ress => {
+        if (ress.length > 0) {
+            res.send({
+            data: {
+                code: 200,
+                data: ress
+            }
+        })
+        } else {
+            res.send({
+                data: {
+                    code: 201,
+                    message: "暂无排班信息"
+                }
+            })
+        }
+    })
+})
+
 // 查询单个值班
 router.post('/querySingleDuty', function (req, res, next) {
     let params = {

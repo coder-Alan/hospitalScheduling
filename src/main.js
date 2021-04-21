@@ -18,7 +18,7 @@ if (localStorage.userToken) {
   Vue.http.headers.common['Authorization'] = localStorage.userToken
 } else {
   // 登录失败
-  location.href = './login.html'
+  // location.href = './index.html'
 }
 
 new Vue({

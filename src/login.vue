@@ -122,6 +122,8 @@ export default {
         isRegisteredNickName: false,
       };
     },
+    computed: {
+    },
     methods: {
       testNickName() {
         if (this.ruleForm.uNickName != '') {
@@ -164,7 +166,7 @@ export default {
                   type: 'success'
                 });
                 setTimeout(()=>{
-                  location.href = '/'
+                  location.href = '/?isLogin=1'
                 }, 3000)
               } else {
                 this.$message.error('登录失败');
