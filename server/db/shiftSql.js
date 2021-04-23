@@ -1,10 +1,10 @@
 var shift = {
     // 查询调班
     queryShift(param) {
-        if (param.tDay && param.tName) {
-            return "SELECT * FROM table_shift WHERE tDay = '" + param.tDay + "' OR tName = '" + param.tName + "' LIMIT 10 OFFSET " + param.page + "";
-        } else if (param.tName) {
-            return "SELECT * FROM table_shift WHERE tName = '" + param.tName + "'";
+        if (param.tDay && param.tPeople) {
+            return "SELECT * FROM table_shift WHERE tDay = '" + param.tDay + "' AND tPeople = '" + param.tPeople + "' LIMIT 10 OFFSET " + param.page + "";
+        } else if (param.tPeople) {
+            return "SELECT * FROM table_shift WHERE tPeople = '" + param.tPeople + "'";
         } else if (param.tDay) {
             return "SELECT * FROM table_shift WHERE tDay = '" + param.tDay + "'";
         } else {
@@ -21,19 +21,20 @@ var shift = {
     },
     // 增加一条调班数据
     inserShiftData(param) {
-        let tName = param.tName;
+        let tPeople = param.tPeople;
+        let kName = param.kName;
         let tDate = param.tDate;
         let tDay = param.tDay;
         let tClasses = param.tClasses;
 
-        return "INSERT INTO table_shift (tName,tDate,tDay,tClasses) VALUES ('" + tName + "','" + tDate + "','" + tDay + "','" + tClasses + "')";
+        return "INSERT INTO table_shift (tPeople,kName,tDate,tDay,tClasses) VALUES ('" + tPeople + "','" + kName + "','" + tDate + "','" + tDay + "','" + tClasses + "')";
     },
     // 修改调班信息
     updateShift(params) {
-        return "UPDATE table_shift SET tName='" + params.tName + "', tDate='" + params.tDate + "', tDay='" + params.tDay + "', tClasses='" + params.tClasses + "' WHERE tCode='" + params.tCode + "'";
+        return "UPDATE table_shift SET tPeople='" + params.tPeople + "', kName='" + params.kName + "', tDate='" + params.tDate + "', tDay='" + params.tDay + "', tClasses='" + params.tClasses + "' WHERE tCode='" + params.tCode + "'";
     },
     deleteShift(params) {
-        return "DELETE FROM table_shift WHERE tName IN (" + params.tName + ")";
+        return "DELETE FROM table_shift WHERE tPeople IN (" + params.tPeople + ")";
     },
 }
 

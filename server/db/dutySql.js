@@ -2,7 +2,7 @@ var duty = {
     // 查询值班信息
     queryDuty(param) {
         if (param.zCode && param.zPeople) {
-            return "SELECT * FROM table_duty WHERE zCode = '" + param.zCode + "' OR zPeople = '" + param.zPeople + "'";
+            return "SELECT * FROM table_duty WHERE zCode = '" + param.zCode + "' AND zPeople = '" + param.zPeople + "'";
         } else if (param.zPeople) {
             return "SELECT * FROM table_duty WHERE zPeople = '" + param.zPeople + "'";
         } else if (param.zCode) {
@@ -10,6 +10,9 @@ var duty = {
         } else {
             return "SELECT * FROM table_duty LIMIT 10 OFFSET " + param.page + "";
         }
+    },
+    queryShift(param) {
+        return "SELECT * FROM table_shift WHERE tPeople = '" + param.tPeople + "'";
     },
     // 查询值班条数
     queryDutyTotal() {

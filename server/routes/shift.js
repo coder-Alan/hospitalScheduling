@@ -19,7 +19,7 @@ router.get('/', function (req, res, next) {
 // 查询单个调班
 router.post('/querySingleShift', function (req, res, next) {
     let params = {
-        tName: req.body.tName
+        tPeople: req.body.tPeople
     };
     connection.query(shift.queryShift(params), function (error, results, fields) {
         if (results) {
@@ -46,7 +46,7 @@ router.post('/queryShiftList', function (req, res, next) {
     let pageSize = req.body.pageSize
     let page = req.body.page
     let params = {
-        tName: req.body.tName,
+        tPeople: req.body.tPeople,
         tDay: req.body.tDay,
     };
     params.page = (page - 1) * pageSize
@@ -113,41 +113,11 @@ router.get('/queryAllBName', function (req, res, next) {
     })
 })
 
-//查询调班名称是否存在
-router.post('/testTName', function (req, res, next) {
-    let params = {
-        tName: req.body.tName
-    };
-    connection.query(shift.queryShift(params), function (error, results, fields) {
-        if (results.length > 0) {
-            res.send({
-                data: {
-                    code: 201,
-                    message: "该调班名称已存在"
-                }
-            })
-        } else if (results.length == 0) {
-            res.send({
-                data: {
-                    code: 200,
-                    message: "该调班名称可以添加"
-                }
-            })
-        } else {
-            res.send({
-                data: {
-                    code: -100,
-                    message: error
-                }
-            })
-        }
-    })
-})
-
 // 添加调班信息
 router.post('/addShift', function (req, res, next) {
     let params = {
-        tName: req.body.tName,
+        tPeople: req.body.tPeople,
+        kName: req.body.kName,
         tDate: req.body.tDate,
         tDay: req.body.tDay,
         tClasses: req.body.tClasses,
@@ -193,11 +163,12 @@ router.post('/addShift', function (req, res, next) {
 
 // 修改调班信息
 router.post('/updateShift', function (req, res, next) {
-    let param = {tName: req.body.oldTName}
+    let param = {tPeople: req.body.oldTName}
     connection.query(shift.queryShift(param), function (err, results) {
         if (results) {
             let params = {
-                tName: req.body.tName,
+                tPeople: req.body.tPeople,
+                kName: req.body.kName,
                 tDate: req.body.tDate,
                 tDay: req.body.tDay,
                 tClasses: req.body.tClasses,
@@ -235,7 +206,7 @@ router.post('/updateShift', function (req, res, next) {
 // 删除调班信息
 router.post('/deleteShift', function (req, res, next) {
     let params = {
-        tName: req.body.tName
+        tPeople: req.body.tPeople
     };
     connection.query(shift.deleteShift(params), function (error, results, fields) {
         if (results) {

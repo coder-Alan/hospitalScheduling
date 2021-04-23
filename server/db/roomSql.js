@@ -2,7 +2,7 @@ var room = {
     // 查询科室
     queryRoom(param) {
         if(param.kCode && param.kName) {
-            return "SELECT * FROM table_room WHERE kName = '" + param.kName + "' OR kCode = '" + param.kCode + "'";
+            return "SELECT * FROM table_room WHERE kName = '" + param.kName + "' AND kCode = '" + param.kCode + "'";
         } else if (param.kCode) {
             return "SELECT * FROM table_room WHERE kCode = '" + param.kCode + "'";
         } else if (param.kName) {

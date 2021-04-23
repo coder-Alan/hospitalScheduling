@@ -2,7 +2,7 @@ var places = {
     // 查询地点
     queryPlaces(param) {
         if (param.dName && param.kName) {
-            return "SELECT * FROM table_places WHERE kName = '" + param.kName + "' OR dName = '" + param.dName + "'";
+            return "SELECT * FROM table_places WHERE kName = '" + param.kName + "' AND dName = '" + param.dName + "'";
         } else if (param.dName) {
             return "SELECT * FROM table_places WHERE dName = '" + param.dName + "'";
         } else if (param.kName) {

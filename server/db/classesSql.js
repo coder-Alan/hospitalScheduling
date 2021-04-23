@@ -2,7 +2,7 @@ var classes = {
     // 查询地点
     queryClasses(param) {
         if (param.bCode && param.bName) {
-            return "SELECT * FROM table_classes WHERE bCode = '" + param.bCode + "' OR bName = '" + param.bName + "'";
+            return "SELECT * FROM table_classes WHERE bCode = '" + param.bCode + "' AND bName = '" + param.bName + "'";
         } else if (param.bName) {
             return "SELECT * FROM table_classes WHERE bName = '" + param.bName + "'";
         } else if (param.bCode) {

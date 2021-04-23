@@ -21,13 +21,6 @@ function queryAllBName() {
     )
 }
 
-function testTName(data) {
-    return axios.post(
-        http + '/shift/testTName',
-        data
-    )
-}
-
 function querySingleShift(data) {
     return axios.post(
         http + '/shift/querySingleShift',
@@ -53,7 +46,6 @@ export {
     addShift,
     queryShiftList,
     queryAllBName,
-    testTName,
     querySingleShift,
     updateShift,
     deleteShift,

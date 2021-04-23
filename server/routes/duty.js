@@ -22,10 +22,7 @@ router.post('/queryAllDutyList', function (req, res, next) {
     new Promise(async (ress, rej) => {
         let dutyList = []
         for (let i = 0; i < staffList.length; i++) {
-            let params = {
-                zPeople: staffList[i]
-            }
-            await connection.query(duty.queryDuty(params), function (error, results, fields) {
+            await connection.query(duty.queryDuty({ zPeople: staffList[i] }), function (error, results, fields) {
                 if (results.length > 0) {
                     let oneObj = {
                         yName: '',
@@ -43,6 +40,41 @@ router.post('/queryAllDutyList', function (req, res, next) {
                         })
                     }
                     dutyList.push(oneObj)
+                }
+            })
+            await connection.query(duty.queryShift({ tPeople: staffList[i] }), function (error, results, fields) {
+                if (results.length > 0) {
+                    let isHas = false
+                    for (let k = 0; k < dutyList.length; k++) {
+                        if (results[0].tPeople == dutyList[k].yName) {
+                            for (let j = 0; j < results.length; j++) {
+                                dutyList[k].dutyList.push({
+                                    zDay: results[j].tDay,
+                                    zClasses: results[j].tClasses + '(调)'
+                                })
+                            }
+                            isHas = true
+                            break;
+                        }
+                    }
+                    if (!isHas) {
+                        let oneObj = {
+                            yName: '',
+                            kName: '',
+                            dutyList: []
+                        }
+                        for (let j = 0; j < results.length; j++) {
+                            if (j === 0) {
+                                oneObj.yName = results[j].tPeople
+                                oneObj.kName = results[j].kName
+                            }
+                            oneObj.dutyList.push({
+                                zDay: results[j].tDay,
+                                zClasses: results[j].tClasses + '(调)'
+                            })
+                        }
+                        dutyList.push(oneObj)
+                    }
                 }
             })
         }

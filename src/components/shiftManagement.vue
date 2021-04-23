@@ -2,8 +2,8 @@
 <!-- 调班信息表 -->
     <div class="user-container">
         <div class="filter-container">
-            <label for="searchName" class="filter-name">调班名称：</label>
-            <el-input id="searchName" v-model.trim="listQuery.tName" style="padding-right:20px;" class="filter-input" placeholder="请输入" />
+            <label for="searchName" class="filter-name">调班人员：</label>
+            <el-input id="searchName" v-model.trim="listQuery.tPeople" style="padding-right:20px;" class="filter-input" placeholder="请输入" />
             <label for="searchNickName" class="filter-name">调班星期：</label>
             <el-select v-model="listQuery.tDay" class="filter-input" clearable placeholder="请选择">
                 <el-option
@@ -32,9 +32,14 @@
                 align="center"
                 width="50"
             />
-            <el-table-column label="调班名称" width="170" align="center">
+            <el-table-column label="调班人员" width="170" align="center">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.tName }}</span>
+                    <span>{{ scope.row.tPeople }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="所属科室" width="170" align="center">
+                <template slot-scope="scope">
+                    <span>{{ scope.row.kName }}</span>
                 </template>
             </el-table-column>
             <el-table-column label="调班日期" width="200" align="center">
@@ -65,8 +70,11 @@
         <!-- 添加、编辑对话框 -->
         <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible" width="30%">
             <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="90px" class="form">
-                <el-form-item label="调班名称:" prop="tName">
-                    <el-input type="text" v-model="ruleForm.tName" @blur='testTName' autocomplete="off"></el-input>
+                <el-form-item label="调班人员:" prop="tPeople">
+                    <el-input type="text" v-model="ruleForm.tPeople" @blur='testZPeople' autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="所属科室:" prop="kName">
+                    <el-input type="text" v-model="ruleForm.kName" autocomplete="off" :disabled="true"></el-input>
                 </el-form-item>
                 <el-form-item label="调班日期:" prop="tDate">
                     <el-date-picker
@@ -109,16 +117,30 @@ import {
     addShift,
     queryShiftList,
     queryAllBName,
-    testTName,
     querySingleShift,
     updateShift,
     deleteShift,
 } from '../api/shift'
+import {
+    testZPeople
+} from '../api/duty'
 import waves from '../directive/waves' // 按钮水波纹
 import Pagination from './Pagination/index' // secondary package based on el-pagination
 
 export default {
     data() {
+        var validateZPeople = (rule, value, callback) => {
+            setTimeout(() => {
+                if (this.isRegisteredZPeople == 201) {
+                    callback(new Error('该员工不存在'));
+                    this.isRegisteredZPeople = ''
+                } else if (value === '') {
+                    callback(new Error('请输入员工姓名'));
+                } else {
+                    callback();
+                }
+            }, 500)
+        };
         var validateTName = (rule, value, callback) => {
             setTimeout(() => {
                 if (this.isRegisteredTName == 201) {
@@ -157,7 +179,7 @@ export default {
             list: [],
             total: 0,
             listQuery: {
-                tName: '',
+                tPeople: '',
                 tDay: '',
                 page: 1,
                 pageSize: 10
@@ -167,13 +189,14 @@ export default {
             dialogTitle: '',
             // 添加、编辑表单验证
             ruleForm: {
-                tName: '',
+                tPeople: '',
+                kName: '',
                 tDate: '',
                 tDay: '',
                 tClasses: '',
             },
             rules: {
-                tName: [{ validator: validateTName, trigger: 'blur' }],
+                tPeople: [{ validator: validateZPeople, trigger: 'blur' }],
                 tDate: [{ validator: validateTDate, trigger: 'blur' }],
                 tDay: [{ validator: validateTDay, trigger: 'blur' }],
                 tClasses: [{ validator: validateTClasses, trigger: 'blur' }],
@@ -271,12 +294,12 @@ export default {
             }
         },
         handleSelectionChange(val) {
-            let tNameList = []
+            let tPeopleList = []
             val.forEach(item => {
-                tNameList.push(item.tName)
+                tPeopleList.push(item.tPeople)
             })
             let str = ''
-            tNameList.forEach(item => {
+            tPeopleList.forEach(item => {
                 str += ("'" + item + "',")
             })
             str = str.slice(0, str.lastIndexOf(','))
@@ -302,7 +325,8 @@ export default {
             this.handle = 'add'
             this.dialogFormVisible = true
             this.ruleForm = {
-                tName: '',
+                tPeople: '',
+                kName: '',
                 tDate: '',
                 tDay: '',
                 tClasses: '',
@@ -315,7 +339,7 @@ export default {
                 type: 'warning'
             }).then(() => {
                 if (this.currentDelete != '') {
-                    deleteShift({tName: this.currentDelete}).then(res => {
+                    deleteShift({tPeople: this.currentDelete}).then(res => {
                         let data = res.data.data
                         if (data.code == 200) {
                             this.listLoading = false
@@ -345,20 +369,21 @@ export default {
             this.dialogTitle = '编辑'
             this.handle = 'edit'
             this.dialogFormVisible = true
-            this.ruleForm.tName = val.tName
+            this.ruleForm.tPeople = val.tPeople
+            this.ruleForm.kName = val.kName
             this.ruleForm.tDate = val.tDate
             this.ruleForm.tDay = val.tDay
             this.ruleForm.tClasses = val.tClasses
-            this.oldTName = val.tName
+            this.oldTName = val.tPeople
         },
         handleDelete(val) {
-            this.currentDelete = "'" + val.tName + "'"
+            this.currentDelete = "'" + val.tPeople + "'"
             this.$confirm('是否确定删除', '删除', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                deleteShift({tName: this.currentDelete}).then(res => {
+                deleteShift({tPeople: this.currentDelete}).then(res => {
                     let data = res.data.data
                     if (data.code == 200) {
                         this.listLoading = false
@@ -392,7 +417,8 @@ export default {
                                     type: 'success'
                                 });
                                 this.ruleForm = {
-                                    tName: '',
+                                    tPeople: '',
+                                    kName: '',
                                     tDate: '',
                                     tDay: '',
                                     tClasses: '',
@@ -420,7 +446,8 @@ export default {
                                     type: 'success'
                                 });
                                 this.ruleForm = {
-                                    tName: '',
+                                    tPeople: '',
+                                    kName: '',
                                     tDate: '',
                                     tDay: '',
                                     tClasses: '',
@@ -439,19 +466,26 @@ export default {
         handleAddCancel() {
             this.dialogFormVisible = false
             this.ruleForm = {
-                tName: '',
+                tPeople: '',
+                kName: '',
                 tDate: '',
                 tDay: '',
                 tClasses: '',
             }
         },
-        testTName() {
-            if (this.ruleForm.tName != '') {
-                testTName({tName: this.ruleForm.tName}).then(res => {
+        testZPeople() {
+            if (this.ruleForm.tPeople != '') {
+                testZPeople({zPeople: this.ruleForm.tPeople}).then(res => {
                     if (res.data.data.code == 201) {
-                        this.isRegisteredTName = 201
+                        this.isRegisteredZPeople = 201
                     } else {
-                        this.isRegisteredTName = ''
+                        this.isRegisteredZPeople = ''
+                    }
+                    if (res.data.data.code === 200) {
+                        // 科室
+                        this.ruleForm.kName = res.data.data.data.yDepartment
+                    } else {
+                        this.ruleForm.kName = ''
                     }
                 })
             }

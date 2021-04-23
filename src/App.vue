@@ -40,7 +40,7 @@
             <el-radio-button :label="true">收起</el-radio-button>
           </el-radio-group>
           <div class="schedule-tab" @mouseenter="headEnter">
-            <img src="./assets/image/head-portrait.jpg" alt="">
+            <img src="./assets/image/login.png" alt="">
           </div>
         </el-header>
         <el-main class="app-main">

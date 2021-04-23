@@ -3,7 +3,7 @@
         <div class="message" v-if="!isSupper">
             <div class="edit-message">
                 <div class="head-portrait">
-                    <img src="../assets/image/head-portrait.jpg" alt="">
+                    <img src="../assets/image/defeat-login-img.png" alt="">
                 </div>
                 <el-button v-if="staffMessage" style="width: 180px; padding: 8px 23px;" @click="handleEdit" icon="el-icon-edit" round>信息修改</el-button>
             </div>
@@ -22,7 +22,7 @@
         <div class="message" v-else>
             <div class="edit-message">
                 <div class="head-portrait">
-                    <img src="../assets/image/head-portrait.jpg" alt="">
+                    <img src="../assets/image/defeat-login-img.png" alt="">
                 </div>
             </div>
             <div class="details">
@@ -190,7 +190,6 @@ export default {
                     querySingleStaff({
                         uCode: data.uCode
                     }).then(staff => {
-                        console.log(111, staff)
                         let staffData = staff.data.data
                         if (staffData.code === 200) {
                             this.staffMessage = staffData.data
@@ -208,18 +207,20 @@ export default {
                             queryWorkTimes({yCode: this.staffMessage.yCode}).then((times) => {
                                 let timeData = times.data.data
                                 if (timeData.code === 200) {
-                                    if (timeData.data.startTime && !timeData.data.endTime) {
-                                        this.startTime = timeData.data.startTime
-                                        this.tabText = '下班打卡'
-                                        this.clockActive = 1
-                                    } else if (timeData.data.endTime) {
-                                        clearInterval(timer)
-                                        this.startTime = timeData.data.startTime
-                                        this.endTime = timeData.data.endTime
-                                        this.tabText = '打卡完成'
-                                        this.currentTime = ''
-                                        this.$refs.clock.style = 'background: #999'
-                                        this.clockActive = 2
+                                    if (timeData.data.workDate == this.getNowFormatDate()) {
+                                        if (timeData.data.startTime && !timeData.data.endTime) {
+                                            this.startTime = timeData.data.startTime
+                                            this.tabText = '下班打卡'
+                                            this.clockActive = 1
+                                        } else if (timeData.data.endTime) {
+                                            clearInterval(timer)
+                                            this.startTime = timeData.data.startTime
+                                            this.endTime = timeData.data.endTime
+                                            this.tabText = '打卡完成'
+                                            this.currentTime = ''
+                                            this.$refs.clock.style = 'background: #999'
+                                            this.clockActive = 2
+                                        }
                                     }
                                     // 如果当天日期不同，先清空数据库里的上班时间和下班时间
                                     if (timeData.data.workDate != this.getNowFormatDate()) {
@@ -422,11 +423,13 @@ export default {
 .edit-message {
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
     align-items: center;
     margin-right: 60px;
 }
 .head-portrait {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 30px ;
     border: 1px solid #ccc;
     border-radius: 50%;

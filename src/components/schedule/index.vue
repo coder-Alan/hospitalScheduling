@@ -2,8 +2,13 @@
     <div class="time-table" v-show="packUp">
         <div class="table-header">
             <div class="title">康德医院排班管理系统</div>
-            <div class="schedule-tab" @mouseenter="headEnter">
-                <img src="../../assets/image/head-portrait.jpg" alt="">
+            <div class="header-right">
+                <el-badge :value="newsTotal" class="item" v-if="isLogin && newsTotal > 0">
+                    <el-button @click="openDrawer" size="small">消息</el-button>
+                </el-badge>
+                <div class="schedule-tab" @mouseenter="headEnter">
+                    <img src="../../assets/image/login.png" alt="">
+                </div>
             </div>
         </div>
         <div class="schedule-fixed">
@@ -36,7 +41,13 @@
                         </tr>
                     </th>
                 </tr>
-                <tr align = center v-for="(item, index) in dutyList" :key="index">
+                <tr 
+                    align = center
+                    v-loading="loading"
+                    element-loading-text='拼命加载中'
+                    v-for="(item, index) in dutyList" 
+                    :key="index"
+                >
                     <td height = 100px >{{item.kName}}</td>
                     <td height = 100px >{{item.yName}}</td>
                     <td>
@@ -50,13 +61,33 @@
                 </tr>
             </table>
         </div>
+        <el-drawer
+            title="消息"
+            :visible.sync="drawer"
+            direction="ltr"
+            size='25%'
+        >
+            <div v-if="newsTotal === 0" style="text-align:center;">
+                暂无消息...
+            </div>
+            <div v-else class="news-list">
+                <p v-for="(item, index) in newsList" :key="index">
+                    {{index+1}}、 {{item}} 
+                </p>
+            </div>
+        </el-drawer>
     </div>
 </template>
 
 <script>
 import {mapMutations, mapGetters} from 'vuex'
-import { queryStaffList } from '../../api/staff'
+import { querySingleStaff, queryStaffList } from '../../api/staff'
 import { queryAllDutyList } from '../../api/duty'
+import { 
+    querySingleUser,
+    queryWorkTimes,
+    updateWorkTimes
+} from '../../api/user'
 export default {
     name: 'timeTable',
     data() {
@@ -64,7 +95,11 @@ export default {
             week: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
             isEnter: false,
             staffList: [],
-            dutyList: []
+            dutyList: [],
+            drawer: false,
+            newsTotal: 0,
+            newsList: [],
+            loading: true
         }
     },
     props: ['packUp', 'userName'],
@@ -78,6 +113,9 @@ export default {
         ...mapMutations(['setIsLogin']),
         init() {
             this.getRoomList()
+            if (this.isLogin) {
+                this.getStaffMessage()
+            }
         },
         // 获取所有的科室列表
         getRoomList() {
@@ -99,7 +137,6 @@ export default {
                         let dutyData = ress.data.data
                         if (dutyData.code === 200) {
                             let dutyList = dutyData.data
-                            console.log(333, dutyList)
                             dutyList.forEach(item => {
                                 let oneClass = []
                                 this.week.forEach(day => {
@@ -113,14 +150,96 @@ export default {
                                 })
                                 item.class = oneClass
                             });
-                            console.log(dutyList)
                             this.dutyList = dutyList
+                            this.loading = false
                         }
                     })
                 }
             }), (err) => {
                 console.log(err)
             }
+        },
+        getStaffMessage() {
+            querySingleUser({
+              uName: localStorage.getItem('userName')
+            }).then(res => {
+                if (res.data.data.code == 200) {
+                    let data = res.data.data.data
+                    querySingleStaff({
+                        uCode: data.uCode
+                    }).then(staff => {
+                        let staffData = staff.data.data
+                        if (staffData.code === 200) {
+                            this.staffMessage = staffData.data
+                            queryWorkTimes({yCode: this.staffMessage.yCode}).then((times) => {
+                                let timeData = times.data.data
+                                if (timeData.code === 200) {
+                                    if (timeData.data.workDate == this.getNowFormatDate()) {
+                                        if (timeData.data.startTime && !timeData.data.endTime) {
+                                            let startTime = timeData.data.startTime
+                                            if (startTime.indexOf('超过') != -1) {
+                                                this.newsList.push('你于'+startTime+'打卡完成！')
+                                            } else {
+                                                this.newsList.push('你已超过打卡时间(9:00),请及时处理！')
+                                            }
+                                            let myDate = new Date();
+                                            let hours = myDate.getHours() < 10 ? '0' + myDate.getHours() : myDate.getHours();
+                                            let idx = startTime.indexOf(':')
+                                            let oldHours = startTime.slice(idx - 2, idx)
+                                            if (parseInt(hours) - parseInt(oldHours) > 8) {
+                                                this.newsList.push('你已连续工作超过8小时，请适当休息！')
+                                            }
+                                        } else if (timeData.data.endTime) {
+                                            let startTime = timeData.data.startTime
+                                            let endTime = timeData.data.endTime
+                                            if (startTime.indexOf('超过') != -1) {
+                                                this.newsList.push('你于'+startTime+'打卡完成！')
+                                            } else {
+                                                this.newsList.push('你已超过打卡时间(9:00),请及时处理！')
+                                            }
+                                            this.newsList.push('你于'+endTime+'打卡完成！')
+                                        }
+                                        this.newsTotal = this.newsList.length
+                                    }
+                                    // 如果当天日期不同，先清空数据库里的上班时间和下班时间
+                                    if (timeData.data.workDate != this.getNowFormatDate()) {
+                                        let data = {
+                                            yCode: this.staffMessage.yCode,
+                                            startTime: '',
+                                            endTime: '',
+                                            workDate: this.getNowFormatDate()
+                                        }
+                                        updateWorkTimes(data).then(res => {
+                                            if (res.data.data.code === 200) {
+                                                console.log(res.data.data.message)
+                                            }
+                                        })
+                                    }
+                                }
+                            })
+                        } else {
+                            this.$message({
+                                message: '请联系管理员绑定你的职工信息',
+                                type: 'warning'
+                            });
+                        }
+                    })
+                }
+            })
+        },
+        getNowFormatDate() {
+            var date = new Date();
+            var year = date.getFullYear();
+            var month = date.getMonth() + 1;
+            var strDate = date.getDate();
+            if (month >= 1 && month <= 9) {
+                month = "0" + month;
+            }
+            if (strDate >= 0 && strDate <= 9) {
+                strDate = "0" + strDate;
+            }
+            var currentdate = year + '-' + month + '-' + strDate;
+            return currentdate;
         },
         headEnter() {
             this.isEnter = true
@@ -140,6 +259,9 @@ export default {
         },
         loginIn() {
             location.href = './login.html'
+        },
+        openDrawer() {
+            this.drawer = true
         }
     },
 }
@@ -171,6 +293,9 @@ export default {
     text-shadow: 5px 5px 5px red;
 }
 .table-header .schedule-tab {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 50px;
     height: 50px;
     border: 1px solid #ccc;
@@ -181,6 +306,19 @@ export default {
 .table-header .schedule-tab img {
     width: 50px;
     height: 50px;
+}
+.header-right {
+    display: flex;
+}
+.item {
+  margin-top: 10px;
+  margin-right: 40px;
+}
+.news-list {
+    padding-left: 20px;
+}
+.news-list p {
+    padding-bottom: 10px;
 }
 .schedule-fixed {
     position: fixed;
